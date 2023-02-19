@@ -11,8 +11,9 @@ finnhub_client = finnhub.Client(api_key=API_KEY)
 
 ticks = int(time.time())
 
-def getData(ticker):
-    data = finnhub_client.stock_candles(ticker, 'D', ticks - 31556926, ticks)
+def getOCHLData(ticker, days):
+    start = days * 24 * 60 * 60
+    data = finnhub_client.stock_candles(ticker, 'D', ticks - start, ticks)
 
     daily_close = data.get('c')
     daily_open = data.get('o')

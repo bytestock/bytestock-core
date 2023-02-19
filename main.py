@@ -1,14 +1,14 @@
-import yfinance as yf
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-
-goog = yf.Ticker("GOOG")
-goog.fast_info
+import calculations
+import data
 
 
-data = goog.history(period="1y")
-#shares = msft.get_shares_full(start = "2022-01-01", end = None)
+def main():
+    user_input = input("Enter a stock: ")
+    days = int(input("Enter prefered days: "))
+    close_data = data.getOCHLData(user_input, days)[1]
+    print(close_data)
+    calculations.potential_chance(close_data, (days))
 
-print(data)
+
+if __name__ == "__main__":
+    main()

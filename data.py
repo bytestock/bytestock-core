@@ -21,7 +21,7 @@ def getOCHLData(ticker, days):
     daily_low = data.get('l')
 
     return daily_open, daily_close, daily_high, daily_low
-    
+
 def getRealTimeOCHL(ticker):
     data = finnhub_client.quote(ticker)
 

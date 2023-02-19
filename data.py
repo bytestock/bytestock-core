@@ -26,8 +26,10 @@ def getRealTimeOCHL(ticker):
     data = finnhub_client.quote(ticker)
 
     rt_open = data.get('o')
-    rt_close = data.get('c')
+    rt_current = data.get('c')
     rt_high = data.get('h')
     rt_low = data.get('l')
+    rt_change = data.get('d')
+    rt_change_percent = data.get('dp')
 
-    return rt_open, rt_close, rt_high, rt_low
+    return rt_open, rt_current, rt_high, rt_low, rt_change, rt_change_percent

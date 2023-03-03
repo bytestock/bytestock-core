@@ -59,9 +59,7 @@ def daily_ratio_standard_deviation_calculation(daily_ratio):
                 #print(f"i: {i}")
                 #for n in range((i-4),i+1):
                     #daily_ratio__sum +=daily_ratio[n]
-                print(daily_ratio[(i-5):i])
                 daily_ratio_standard_deviation = statistics.stdev(daily_ratio[(i-5):i])# FIXED: FK NUMPY something wrong with standard deviation, how does it work?
-                print(daily_ratio_standard_deviation)
                 daily_ratio_standard_deviation_values.append(daily_ratio_standard_deviation)
             except:
                 pass

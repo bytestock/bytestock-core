@@ -1,4 +1,4 @@
-import numpy as np
+import statistics
 
 def daily_ratio_calculation(close_data):
     daily_ratio_values = []
@@ -53,13 +53,14 @@ def daily_ratio_standard_deviation_calculation(daily_ratio):
     for i in range(len(daily_ratio)):
         daily_ratio_count +=1
         daily_ratio__sum = 0
-        if daily_ratio_count >4:
+        if i >4:
             try:
                 #print(f"daily_ratio_count: {daily_ratio_count}")
                 #print(f"i: {i}")
                 #for n in range((i-4),i+1):
                     #daily_ratio__sum +=daily_ratio[n]
-                daily_ratio_standard_deviation = np.std(5, daily_ratio[(i-4),i+1])# something wrong with standard deviation, how does it work?
+                print(daily_ratio[(i-5):i])
+                daily_ratio_standard_deviation = statistics.stdev(daily_ratio[(i-5):i])# FIXED: FK NUMPY something wrong with standard deviation, how does it work?
                 print(daily_ratio_standard_deviation)
                 daily_ratio_standard_deviation_values.append(daily_ratio_standard_deviation)
             except:

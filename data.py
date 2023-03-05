@@ -1,4 +1,5 @@
 import finnhub
+import streamlit as st
 import os
 from dotenv import load_dotenv
 import time
@@ -7,7 +8,7 @@ import misc
 
 load_dotenv()
 
-API_KEY=os.getenv('API_KEY')
+API_KEY=st.secrets['API_KEY']
 finnhub_client = finnhub.Client(api_key=API_KEY)
 
 ticks = int(time.time())

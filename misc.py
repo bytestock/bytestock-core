@@ -60,7 +60,7 @@ def telemetry(ticker, days):
 
     if timestamp == str(ticks):
         print('RATELIMITED')
-        time.sleep(1)
+        time.sleep(1.25)
         ticks = int(time.time())
 
     with open('telemetry.txt', 'w') as file:

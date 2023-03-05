@@ -14,7 +14,10 @@ ticks = int(time.time())
 
 def getOCHLData(ticker, days):
     start = days * 24 * 60 * 60
-    data = finnhub_client.stock_candles(ticker, 'D', ticks - start, ticks)
+
+    rate_limit_free = misc.telemetry(ticker, days)
+    if rate_limit_free:
+        data = finnhub_client.stock_candles(ticker, 'D', ticks - start, ticks)
 
     open_days, closed_days = misc.wasMarketClosedFrom(ticks - start, ticks)
     daily_close = data.get('c')

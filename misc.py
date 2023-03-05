@@ -1,4 +1,5 @@
 from datetime import datetime
+import time
 
 def getDateTimefromTicks(ticks):
     date = datetime.fromtimestamp(ticks).strftime('%Y-%m-%d %H:%M:%S')
@@ -48,6 +49,25 @@ def wasMarketClosedFrom(start, end):
             market_open_days.append(current_date)
 
     return market_open_days, market_closed_days
+
+def telemetry(ticker, days):
+    ticks = int(time.time())
+
+    with open('telemetry.txt') as f:
+        lines = f.readlines()
+
+        timestamp = lines[-1].rstrip().split(' ')[2]
+
+    if timestamp == str(ticks):
+        print('RATELIMITED')
+        time.sleep(1)
+        ticks = int(time.time())
+
+    with open('telemetry.txt', 'w') as file:
+        lines.append(f'{ticker} {days} {ticks}\n')
+        file.write(''.join(lines))
+
+        return True
 
 
 

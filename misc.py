@@ -6,6 +6,11 @@ def getDateTimefromTicks(ticks):
 
     return date
 
+def getFancyDateTimefromTicks(ticks):
+    date = datetime.fromtimestamp(ticks).strftime('%b %d %Y')
+
+    return date
+
 def getDayFromDate(date):
     day = datetime.strptime(date, '%Y-%m-%d').strftime('%A')
 
@@ -30,16 +35,13 @@ def isMarketClosed(ticks):
     else:
         return False
 
-def wasMarketClosedFrom(start, end):
-    diff = end - start
-    days = diff // 86400
-
+def wasMarketClosedFrom(start, end, days):
     market_open_days = []
     market_closed_days = []
 
     for i in range(days):
         current = start + i * 86400
-        current_date = getDateTimefromTicks(current)
+        current_date = getFancyDateTimefromTicks(current)
 
         market_closed = isMarketClosed(current)
 

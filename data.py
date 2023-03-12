@@ -20,7 +20,7 @@ def getOCHLData(ticker, days):
     if rate_limit_free:
         data = finnhub_client.stock_candles(ticker, 'D', ticks - start, ticks)
 
-    open_days, closed_days = misc.wasMarketClosedFrom(ticks - start, ticks)
+    open_days, closed_days = misc.wasMarketClosedFrom(ticks - start, ticks, days-1)
     daily_close = data.get('c')
     daily_open = data.get('o')
     daily_high = data.get('h')

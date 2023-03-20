@@ -87,6 +87,7 @@ def simulation_based_on_5day_average_and_Std_Dev_average_calculation(close_data,
     simulation_average_values = []
     score_of_actual_values =[]
     probability_values = []
+    normal_distribution_values = []
     #all_simulation_std_dev_values = []
     for n in range(len(close_data)):
         simulation_values = []
@@ -111,22 +112,29 @@ def simulation_based_on_5day_average_and_Std_Dev_average_calculation(close_data,
             std_dev_minus_2 = simulation_average - (std_dev*2)
             std_dev_minus_3 = simulation_average - (std_dev*3)
 
-            #Score of Actual: CHECK!!!!
+            #Score of Actual: IDK if it is right, std dev looks too high
             try:
                 score_of_actual = (close_data[n+10]-simulation_average)/std_dev
                 score_of_actual_values.append(score_of_actual)
+                #print(score_of_actual, close_data[n+10], simulation_average, std_dev )
             except:
                 pass
             
             #Probabilities
             try:
-                print(".")
+                if score_of_actual > 0 :
+                    normal_distribution = 1- statistics.NormalDist(close_data[n+10],simulation_average, std_dev)
+                    normal_distribution_values.append(normal_distribution)
+                else:
+                    normal_distribution = statistics.NormalDist(close_data[n+10],simulation_average, std_dev)
+                    normal_distribution_values.append(normal_distribution)
             except:
                 pass
-        
+            
         except:
             pass
-    print(score_of_actual_values)
+    #print(score_of_actual_values)
+    print(normal_distribution_values)
     return simulation_average_values
 
 def mathematics(close_data):
@@ -137,7 +145,7 @@ def mathematics(close_data):
     weekly_ratio_average = weekly_ratio_average_calculations(weekly_ratio) #works
     weekly_ratio_standard_deviation = weekly_ratio_standard_deviation_calculation(weekly_ratio) #works
     simulation_average = simulation_based_on_5day_average_and_Std_Dev_average_calculation(close_data, weekly_ratio_average,  weekly_ratio_standard_deviation) #Works
-    print(f"Close data: {close_data}")
-    print(f"Simulation Average Values: {simulation_average}")
+    #print(f"Close data: {close_data}")
+    #print(f"Simulation Average Values: {simulation_average}")
     #print(f"Simulation Std Dev: {simulation_std_dev}")
     #print(f"daily ratio average: {daily_ratio_average}")

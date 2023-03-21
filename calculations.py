@@ -21,14 +21,14 @@ def daily_ratio_calculation(close_data: list) ->list:
             prev_adj_close = current_adj_close
     return daily_ratio_values
 
-def weekly_ratio_calculation(close_data: list) ->list:
+def weekly_ratio_calculation(close_data: list, day: int) ->list:
     weekly_ratio_values = []
     adj_close_count = 0
     for i in range(len(close_data)):
         adj_close_count+=1
-        if adj_close_count >5:
+        if adj_close_count >day:
             try:
-                denominator_daily = close_data[i-5]
+                denominator_daily = close_data[i-day]
                 numerator_daily = close_data[i]
                 weekly_ratio = numerator_daily/denominator_daily
                 weekly_ratio_values.append(weekly_ratio)
@@ -36,28 +36,28 @@ def weekly_ratio_calculation(close_data: list) ->list:
                 pass #weekdays/days that the market is closed
     return weekly_ratio_values
 
-def daily_ratio_average_calculations(daily_ratio: list) ->list:
+def daily_ratio_average_calculations(daily_ratio: list, day:int) ->list:
     daily_ratio_average_values = []
     daily_ratio_count = 0
     for i in range(len(daily_ratio)):
         daily_ratio_count +=1
         daily_ratio_average_sum = 0
-        if daily_ratio_count > 4:
+        if daily_ratio_count > (day-1):
             try:
-                for n in range((i-4),i+1):
+                for n in range((i-(day-1)),i+(day-1)):
                     daily_ratio_average_sum +=daily_ratio[n]
-                daily_ratio_average = daily_ratio_average_sum/5
+                daily_ratio_average = daily_ratio_average_sum/day
                 daily_ratio_average_values.append(daily_ratio_average)
             except:
                 pass
     return daily_ratio_average_values
 
-def daily_ratio_standard_deviation_calculation(daily_ratio:list ) ->list:
+def daily_ratio_standard_deviation_calculation(daily_ratio:list ,day:int) ->list:
     daily_ratio_standard_deviation_values = []
     for i in range(len(daily_ratio)):
-        if i >4:
+        if i >(day-1):
             try:
-                daily_ratio_standard_deviation = statistics.stdev(daily_ratio[(i-5):i])
+                daily_ratio_standard_deviation = statistics.stdev(daily_ratio[(i-day):i])
                 daily_ratio_standard_deviation_values.append(daily_ratio_standard_deviation)
             except:
                 pass
@@ -123,23 +123,42 @@ def simulation_based_on_5day_average_and_Std_Dev_average_calculation(close_data,
                     #normal_distribution = (1-NormalDist(mu=, sigma = ).inv_cdf())*100   
                 percentage = (1 - NormalDist(simulation_average, std_dev).cdf(x)) *100                                                 
                 normal_distribution_values.append(percentage)
-                print(percentage)
             else:
                 percentage =  NormalDist(simulation_average, std_dev).cdf(x) *100                                                
                 normal_distribution_values.append(percentage)
-                print(percentage)
         except:
             pass
+
+        #STEPS 12
+        deviation_count=0
+
+        if close_data[n+10] > std_dev_plus_3:
+            deviation_count+=1
+        elif close_data[n+10] <= std_dev_plus_3 and close_data[n+10] > std_dev_plus_2:
+            deviation_count+=1
+        elif close_data[n+10] <= std_dev_plus_2 and close_data[n+10] > std_dev_plus_1:
+            deviation_count+=1
+        elif close_data[n+10] <= std_dev_plus_1 and close_data[n+10] > simulation_average:
+            deviation_count+=1
+        elif close_data[n+10] <= simulation_average and close_data[n+10] > std_dev_minus_1:
+            deviation_count+=1
+        elif close_data[n+10] <= std_dev_minus_1 and close_data[n+10] > std_dev_minus_2:
+            deviation_count+=1
+        elif close_data[n+10] <= std_dev_minus_2 and close_data[n+10] > std_dev_minus_3:
+            deviation_count+=1
+        elif close_data[n+10] < std_dev_minus_3:
+            deviation_count+=1
+        "mismatch..........."
 
     return normal_distribution_values
 
 def mathematics(close_data):
-    daily_ratio = daily_ratio_calculation(close_data) #correct
-    weekly_ratio = weekly_ratio_calculation(close_data) #correct
-    daily_ratio_average = daily_ratio_average_calculations(daily_ratio) #works
-    daily_ratio_standard_deviation = daily_ratio_standard_deviation_calculation(daily_ratio) #works
-    weekly_ratio_average = weekly_ratio_average_calculations(weekly_ratio) #works
-    weekly_ratio_standard_deviation = weekly_ratio_standard_deviation_calculation(weekly_ratio) #works
-    normal_distribution = simulation_based_on_5day_average_and_Std_Dev_average_calculation(close_data, weekly_ratio_average,  weekly_ratio_standard_deviation) #Works  
-
-    print(normal_distribution)
+    for i in range(5,31):
+        day = i
+        daily_ratio = daily_ratio_calculation(close_data) 
+        weekly_ratio = weekly_ratio_calculation(close_data,day) 
+        daily_ratio_average = daily_ratio_average_calculations(daily_ratio,day) 
+        daily_ratio_standard_deviation = daily_ratio_standard_deviation_calculation(daily_ratio,day) 
+        weekly_ratio_average = weekly_ratio_average_calculations(weekly_ratio) 
+        weekly_ratio_standard_deviation = weekly_ratio_standard_deviation_calculation(weekly_ratio) 
+        normal_distribution = simulation_based_on_5day_average_and_Std_Dev_average_calculation(close_data, weekly_ratio_average,  weekly_ratio_standard_deviation)   

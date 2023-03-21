@@ -2,13 +2,12 @@
 import yfinance as yf
 import streamlit as st
 import os
-from dotenv import load_dotenv
 import time
 import json
 import misc
 import datetime
 
-load_dotenv()
+
 
 #API_KEY=st.secrets['API_KEY']
 #finnhub_client = finnhub.Client(api_key=API_KEY)

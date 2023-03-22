@@ -1,25 +1,25 @@
 """Libraries"""
 
+#TEST EACH AGAIN AND CLEAN UP CODE, ESPECAILLY DAILY RATIO CALCULATIONS
+
 import statistics
 import random
 from statistics import NormalDist
 
 """Functions"""
+
 def daily_ratio_calculation(close_data: list) ->list: 
     """Calculates daily ratio"""
     daily_ratio_values = []
-    adj_close_count = 0
     prev_adj_close= close_data[0]
-    for i in range(len(close_data)):
-        current_adj_close = float(close_data[i])
-        adj_close_count +=1
-        if adj_close_count >1:
-            try: 
-                daily_ratio = (current_adj_close/prev_adj_close)
+    for index, current_close_data in enumerate(close_data):
+        if index >=1:
+            try:
+                daily_ratio = (current_close_data/prev_adj_close)
                 daily_ratio_values.append(daily_ratio)
             except ValueError:
-                pass #weekdays/days that the market is closed
-            prev_adj_close = current_adj_close
+                pass 
+            prev_adj_close = current_close_data
     return daily_ratio_values
 
 def weekly_ratio_calculation(close_data: list, day: int) ->list:
@@ -33,22 +33,17 @@ def weekly_ratio_calculation(close_data: list, day: int) ->list:
                 weekly_ratio = numerator_daily/denominator_daily
                 weekly_ratio_values.append(weekly_ratio)
             except ValueError:
-                pass #weekdays/days that the market is closed
+                pass
     return weekly_ratio_values
 
-def daily_ratio_average_calculations(daily_ratio: list, day:int) ->list:
+def daily_ratio_average_calculations(daily_ratio: list, day:int) ->list: 
     """Calculates daily ratio average"""
     daily_ratio_average_values = []
-    daily_ratio_count = 0
-    for i in range(len(daily_ratio)):
-        daily_ratio_count +=1
-        daily_ratio_average_sum = 0
-        if daily_ratio_count > (day-1):
+    for index,_ in enumerate(daily_ratio):
+        if index >=day:
             try:
-                for n in range((i-(day-1)),i+(day-1)):
-                    daily_ratio_average_sum +=daily_ratio[n]
-                daily_ratio_average = daily_ratio_average_sum/day
-                daily_ratio_average_values.append(daily_ratio_average)
+                daily_ratio_average_sum = statistics.mean(daily_ratio[(index-5):index])
+                daily_ratio_average_values.append(daily_ratio_average_sum)
             except IndexError:
                 pass
     return daily_ratio_average_values
@@ -93,7 +88,7 @@ def simulation_and_probability_calculations(close_data, weekly_ratio_average,  w
     normal_distribution_values = []
     total_true_count = 0 #total counter for trues in step 12
     total_false_count = 0 #total counter for false in step 12
-    for index, current_simulation in enumerate(close_data): 
+    for index, current_simulation in enumerate(close_data):
         simulation_values = []
         try:
             current_weekly_average = weekly_ratio_average[index]
@@ -116,20 +111,20 @@ def simulation_and_probability_calculations(close_data, weekly_ratio_average,  w
             #Score of Actual:
             score_of_actual = (close_data[index+10]-simulation_average)/std_dev
             score_of_actual_values.append(score_of_actual)
-        
+
             #Percentage
-            x = close_data[index+10]
+            close_data_in_10_days = close_data[index+10]
             if score_of_actual > 0 :
-                percentage = (1 - NormalDist(simulation_average, std_dev).cdf(x)) *100                                              
+                percentage = (1 - NormalDist(simulation_average, std_dev).cdf(close_data_in_10_days)) *100                                              
                 normal_distribution_values.append(percentage)
             else:
-                percentage =  NormalDist(simulation_average, std_dev).cdf(x) *100                                           
+                percentage =  NormalDist(simulation_average, std_dev).cdf(close_data_in_10_days) *100                                           
                 normal_distribution_values.append(percentage)
 
             
             #STEPS 12
             try:
-                
+            
                 #It has to check if each statement is false (Reason for 8 different if/else statements)
 
                 if close_data[index+10] > std_dev_plus_3: #>+3STD
@@ -180,14 +175,15 @@ def probability_calculation(total_true_count,total_false_count:int) ->str: #Fina
 #main function of calculations.py
 def mathematics(close_data:list) ->None:
     """Calcualtions for bitestock website"""
-    for i in range(5,31): #days considered for comparisons 
+    for i in range(5,6): #days considered for comparisons
         day = i #current day being compared to
         daily_ratio = daily_ratio_calculation(close_data)
         weekly_ratio = weekly_ratio_calculation(close_data,day)
-        daily_ratio_average = daily_ratio_average_calculations(daily_ratio,day)
+        daily_ratio_average = daily_ratio_average_calculations(daily_ratio,day) 
         daily_ratio_standard_deviation = daily_ratio_standard_deviation_calculation(daily_ratio,day)
         weekly_ratio_average = weekly_ratio_average_calculations(weekly_ratio)
         weekly_ratio_standard_deviation = weekly_ratio_standard_deviation_calculation(weekly_ratio)
         total_true_count, total_false_count = simulation_and_probability_calculations(close_data, weekly_ratio_average,  weekly_ratio_standard_deviation)
         probability =  probability_calculation(total_true_count,total_false_count)
-        print(f"{probability} {i} days from now")
+        #print(f"{probability} {i} days from now")
+        print(daily_ratio_average)

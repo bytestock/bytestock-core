@@ -1,4 +1,4 @@
-#import finnhub
+"""Libraries"""
 import yfinance as yf
 import streamlit as st
 import os
@@ -14,7 +14,8 @@ import datetime
 
 ticks = int(time.time())
 
-def getOCHLData(ticker, days):
+def getOCHLData(ticker, days: int) ->list:
+    """Gets Data"""
     now = datetime.datetime.now()
     d = datetime.timedelta(days = days)
     start = now - d
@@ -36,7 +37,8 @@ def getOCHLData(ticker, days):
 
     return open_days, daily_open, daily_close, daily_adj_close, daily_high, daily_low
 
-def getRealTimeOCHL(ticker, days):
+def getRealTimeOCHL(ticker, days:int) ->list:
+    """Gets Real Time Data"""
     #data = finnhub_client.quote(ticker)
     rate_limit_free = misc.telemetry(ticker, days)
     if rate_limit_free:

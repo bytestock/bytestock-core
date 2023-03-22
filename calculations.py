@@ -1,11 +1,8 @@
 import statistics
-import scipy.stats as scp
-from scipy.stats import norm
 import random 
 from statistics import NormalDist
-import numpy as np
 
-def daily_ratio_calculation(close_data: list) ->list:
+def daily_ratio_calculation(close_data: list) ->list: 
     daily_ratio_values = []
     adj_close_count = 0
     prev_adj_close= close_data[0]
@@ -86,14 +83,17 @@ def weekly_ratio_standard_deviation_calculation(weekly_ratio:list) ->list:
                 pass
     return weekly_ratio_standard_deviation_values
 
-def simulation_based_on_5day_average_and_Std_Dev_average_calculation(close_data, weekly_ratio_average,  weekly_ratio_standard_deviation: list) ->list:
+def simulation_and_probability_calculations(close_data, weekly_ratio_average,  weekly_ratio_standard_deviation: list) ->list:
     simulation_average_values = []
     score_of_actual_values =[]
-    probability_values = []
     normal_distribution_values = []
+    all_probabilities = [] #all probabilities calculated
+    total_true_count = 0 #total counter for trues in step 12
+    total_false_count = 0 #total counter for false in step 12
     #all_simulation_std_dev_values = []
     for n in range(len(close_data)):
         simulation_values = []
+        
         try:
             current_simulation = close_data[n]
             current_weekly_average = weekly_ratio_average[n] 
@@ -117,7 +117,7 @@ def simulation_based_on_5day_average_and_Std_Dev_average_calculation(close_data,
             score_of_actual = (close_data[n+10]-simulation_average)/std_dev
             score_of_actual_values.append(score_of_actual)
         
-            #Probabilities
+            #Percentage
             x = close_data[n+10]
             if score_of_actual > 0 :
                     #normal_distribution = (1-NormalDist(mu=, sigma = ).inv_cdf())*100   
@@ -126,34 +126,55 @@ def simulation_based_on_5day_average_and_Std_Dev_average_calculation(close_data,
             else:
                 percentage =  NormalDist(simulation_average, std_dev).cdf(x) *100                                                
                 normal_distribution_values.append(percentage)
+
+            
+            #STEPS 12
+            try:
+                if close_data[n+10] > std_dev_plus_3: #>+3STD
+                    total_true_count+=1
+                else:
+                    total_false_count+=1 #as previous statement was false
+                if close_data[n+10] <= std_dev_plus_3 and close_data[n+10] > std_dev_plus_2: #>+2STD
+                    total_true_count+=1
+                else:
+                    total_false_count+=1 #as previous statement was false  
+                if close_data[n+10] <= std_dev_plus_2 and close_data[n+10] > std_dev_plus_1: #>+1STD
+                    total_true_count+=1
+                else:
+                    total_false_count+=1 #as previous statement was false
+                if close_data[n+10] <= std_dev_plus_1 and close_data[n+10] > simulation_average: #<+1STD
+                    total_true_count+=1
+                else:
+                    total_false_count+=1 #as previous statement was false
+                if close_data[n+10] <= simulation_average and close_data[n+10] > std_dev_minus_1: #>-1 STD
+                    total_true_count+=1
+                else:
+                    total_false_count+=1 #as previous statement was false
+                if close_data[n+10] <= std_dev_minus_1 and close_data[n+10] > std_dev_minus_2: #<-1 STD
+                    total_true_count+=1
+                else:
+                    total_false_count+=1 #as previous statement was false
+                if close_data[n+10] <= std_dev_minus_2 and close_data[n+10] > std_dev_minus_3:#<-2 STD
+                    total_true_count+=1
+                else:
+                    total_false_count+=1 #as previous statement was false
+                if close_data[n+10] < std_dev_minus_3: #<-3 STD
+                    total_true_count+=1
+                else:
+                    total_false_count+=1 #as previous statement was false  
+            except:
+                pass #The close_data[n+10] has gone past available close data
         except:
-            pass
+            pass  
 
-        #STEPS 12
-        deviation_count=0
+    return total_true_count, total_false_count
 
-        if close_data[n+10] > std_dev_plus_3:
-            deviation_count+=1
-        elif close_data[n+10] <= std_dev_plus_3 and close_data[n+10] > std_dev_plus_2:
-            deviation_count+=1
-        elif close_data[n+10] <= std_dev_plus_2 and close_data[n+10] > std_dev_plus_1:
-            deviation_count+=1
-        elif close_data[n+10] <= std_dev_plus_1 and close_data[n+10] > simulation_average:
-            deviation_count+=1
-        elif close_data[n+10] <= simulation_average and close_data[n+10] > std_dev_minus_1:
-            deviation_count+=1
-        elif close_data[n+10] <= std_dev_minus_1 and close_data[n+10] > std_dev_minus_2:
-            deviation_count+=1
-        elif close_data[n+10] <= std_dev_minus_2 and close_data[n+10] > std_dev_minus_3:
-            deviation_count+=1
-        elif close_data[n+10] < std_dev_minus_3:
-            deviation_count+=1
-        "mismatch..........."
-
-    return normal_distribution_values
-
+def probability_calculation(total_true_count,total_false_count): #Final step of Part 1: 
+    return(f"{(total_true_count/(total_true_count+total_false_count) ) *100} %")
+    
+#main function of calculations.py
 def mathematics(close_data):
-    for i in range(5,31):
+    for i in range(5,31): #days considered for comparisons 
         day = i
         daily_ratio = daily_ratio_calculation(close_data) 
         weekly_ratio = weekly_ratio_calculation(close_data,day) 
@@ -161,4 +182,6 @@ def mathematics(close_data):
         daily_ratio_standard_deviation = daily_ratio_standard_deviation_calculation(daily_ratio,day) 
         weekly_ratio_average = weekly_ratio_average_calculations(weekly_ratio) 
         weekly_ratio_standard_deviation = weekly_ratio_standard_deviation_calculation(weekly_ratio) 
-        normal_distribution = simulation_based_on_5day_average_and_Std_Dev_average_calculation(close_data, weekly_ratio_average,  weekly_ratio_standard_deviation)   
+        total_true_count, total_false_count = simulation_and_probability_calculations(close_data, weekly_ratio_average,  weekly_ratio_standard_deviation)  
+        probability =  probability_calculation(total_true_count,total_false_count)
+        print(f"{probability} {i} days from now")

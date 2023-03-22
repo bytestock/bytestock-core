@@ -1,8 +1,12 @@
+"""Libraries"""
+
 import statistics
 import random
 from statistics import NormalDist
 
+"""Functions"""
 def daily_ratio_calculation(close_data: list) ->list: 
+    """Calculates daily ratio"""
     daily_ratio_values = []
     adj_close_count = 0
     prev_adj_close= close_data[0]
@@ -19,14 +23,13 @@ def daily_ratio_calculation(close_data: list) ->list:
     return daily_ratio_values
 
 def weekly_ratio_calculation(close_data: list, day: int) ->list:
+    """Calculates weekly ratio"""
     weekly_ratio_values = []
-    adj_close_count = 0
-    for i in range(len(close_data)):
-        adj_close_count+=1
-        if adj_close_count >day:
+    for index,element in enumerate(close_data):
+        if index >=day:
             try:
-                denominator_daily = close_data[i-day]
-                numerator_daily = close_data[i]
+                denominator_daily = close_data[index-day]
+                numerator_daily = element
                 weekly_ratio = numerator_daily/denominator_daily
                 weekly_ratio_values.append(weekly_ratio)
             except ValueError:
@@ -34,6 +37,7 @@ def weekly_ratio_calculation(close_data: list, day: int) ->list:
     return weekly_ratio_values
 
 def daily_ratio_average_calculations(daily_ratio: list, day:int) ->list:
+    """Calculates daily ratio average"""
     daily_ratio_average_values = []
     daily_ratio_count = 0
     for i in range(len(daily_ratio)):
@@ -50,6 +54,7 @@ def daily_ratio_average_calculations(daily_ratio: list, day:int) ->list:
     return daily_ratio_average_values
 
 def daily_ratio_standard_deviation_calculation(daily_ratio:list ,day:int) ->list:
+    """Calcualtes daily ratio standard deviation"""
     daily_ratio_standard_deviation_values = []
     for i in range(len(daily_ratio)):
         if i >(day-1):
@@ -61,18 +66,16 @@ def daily_ratio_standard_deviation_calculation(daily_ratio:list ,day:int) ->list
     return daily_ratio_standard_deviation_values
 
 def weekly_ratio_average_calculations(weekly_ratio:list) ->list: #10 day average
+    """Calcualtes weekly ratio average"""
     weekly_ratio_average_values = []
     for i in range(len(weekly_ratio)):
         if i >9:
-            try:
-                weekly_ratio_average = statistics.mean(weekly_ratio[(i-10):i])
-                weekly_ratio_average_values.append(weekly_ratio_average)
-            except ValueError:
-                print(f"Error with {weekly_ratio[i]}")
-                pass 
+            weekly_ratio_average = statistics.mean(weekly_ratio[(i-10):i])
+            weekly_ratio_average_values.append(weekly_ratio_average)
     return weekly_ratio_average_values
 
 def weekly_ratio_standard_deviation_calculation(weekly_ratio:list) ->list:
+    """Calculates weekly ratio standard deviation"""
     weekly_ratio_standard_deviation_values = []
     for i in range(len(weekly_ratio)):
         if i >9:
@@ -84,21 +87,18 @@ def weekly_ratio_standard_deviation_calculation(weekly_ratio:list) ->list:
     return weekly_ratio_standard_deviation_values
 
 def simulation_and_probability_calculations(close_data, weekly_ratio_average,  weekly_ratio_standard_deviation: list) ->list:
+    """Simulations and miscalaneous calcualtions"""
     simulation_average_values = []
     score_of_actual_values =[]
     normal_distribution_values = []
-    all_probabilities = [] #all probabilities calculated
     total_true_count = 0 #total counter for trues in step 12
     total_false_count = 0 #total counter for false in step 12
-    #all_simulation_std_dev_values = []
-    for n in range(len(close_data)):
+    for index, current_simulation in enumerate(close_data): 
         simulation_values = []
-        
         try:
-            current_simulation = close_data[n]
-            current_weekly_average = weekly_ratio_average[n] 
-            current_weekly_standard_deviation = weekly_ratio_standard_deviation[n]
-            for i in range(193): #runs simulation 193 times
+            current_weekly_average = weekly_ratio_average[index]
+            current_weekly_standard_deviation = weekly_ratio_standard_deviation[index]
+            for _ in range(193): #runs simulation 193 times
                 simulation = (NormalDist( current_weekly_average, current_weekly_standard_deviation).inv_cdf(random.uniform(0,1))) *current_simulation
                 simulation_values.append(simulation)
             simulation_average = sum(simulation_values)/len(simulation_values)
@@ -114,17 +114,16 @@ def simulation_and_probability_calculations(close_data, weekly_ratio_average,  w
             std_dev_minus_3 = simulation_average - (std_dev*3)
 
             #Score of Actual:
-            score_of_actual = (close_data[n+10]-simulation_average)/std_dev
+            score_of_actual = (close_data[index+10]-simulation_average)/std_dev
             score_of_actual_values.append(score_of_actual)
         
             #Percentage
-            x = close_data[n+10]
+            x = close_data[index+10]
             if score_of_actual > 0 :
-                    #normal_distribution = (1-NormalDist(mu=, sigma = ).inv_cdf())*100   
-                percentage = (1 - NormalDist(simulation_average, std_dev).cdf(x)) *100                                                 
+                percentage = (1 - NormalDist(simulation_average, std_dev).cdf(x)) *100                                              
                 normal_distribution_values.append(percentage)
             else:
-                percentage =  NormalDist(simulation_average, std_dev).cdf(x) *100                                                
+                percentage =  NormalDist(simulation_average, std_dev).cdf(x) *100                                           
                 normal_distribution_values.append(percentage)
 
             
@@ -133,52 +132,54 @@ def simulation_and_probability_calculations(close_data, weekly_ratio_average,  w
                 
                 #It has to check if each statement is false (Reason for 8 different if/else statements)
 
-                if close_data[n+10] > std_dev_plus_3: #>+3STD
+                if close_data[index+10] > std_dev_plus_3: #>+3STD
                     total_true_count+=1
                 else:
                     total_false_count+=1 #as previous statement was false
-                if close_data[n+10] <= std_dev_plus_3 and close_data[n+10] > std_dev_plus_2: #>+2STD
-                    total_true_count+=1
-                else:
-                    total_false_count+=1 #as previous statement was false  
-                if close_data[n+10] <= std_dev_plus_2 and close_data[n+10] > std_dev_plus_1: #>+1STD
+                if close_data[index+10] <= std_dev_plus_3 and close_data[index+10] > std_dev_plus_2: #>+2STD
                     total_true_count+=1
                 else:
                     total_false_count+=1 #as previous statement was false
-                if close_data[n+10] <= std_dev_plus_1 and close_data[n+10] > simulation_average: #<+1STD
+                if close_data[index+10] <= std_dev_plus_2 and close_data[index+10] > std_dev_plus_1: #>+1STD
                     total_true_count+=1
                 else:
                     total_false_count+=1 #as previous statement was false
-                if close_data[n+10] <= simulation_average and close_data[n+10] > std_dev_minus_1: #>-1 STD
+                if close_data[index+10] <= std_dev_plus_1 and close_data[index+10] > simulation_average: #<+1STD
                     total_true_count+=1
                 else:
                     total_false_count+=1 #as previous statement was false
-                if close_data[n+10] <= std_dev_minus_1 and close_data[n+10] > std_dev_minus_2: #<-1 STD
+                if close_data[index+10] <= simulation_average and close_data[index+10] > std_dev_minus_1: #>-1 STD
                     total_true_count+=1
                 else:
                     total_false_count+=1 #as previous statement was false
-                if close_data[n+10] <= std_dev_minus_2 and close_data[n+10] > std_dev_minus_3:#<-2 STD
+                if close_data[index+10] <= std_dev_minus_1 and close_data[index+10] > std_dev_minus_2: #<-1 STD
                     total_true_count+=1
                 else:
                     total_false_count+=1 #as previous statement was false
-                if close_data[n+10] < std_dev_minus_3: #<-3 STD
+                if close_data[index+10] <= std_dev_minus_2 and close_data[index+10] > std_dev_minus_3:#<-2 STD
                     total_true_count+=1
                 else:
-                    total_false_count+=1 #as previous statement was false  
+                    total_false_count+=1 #as previous statement was false
+                if close_data[index+10] < std_dev_minus_3: #<-3 STD
+                    total_true_count+=1
+                else:
+                    total_false_count+=1 #as previous statement was false
             except ValueError:
                 pass #The close_data[n+10] has gone past available close data
         except IndexError:
-            pass  
+            pass
 
     return total_true_count, total_false_count
 
-def probability_calculation(total_true_count,total_false_count): #Final step of Part 1: 
+def probability_calculation(total_true_count,total_false_count:int) ->str: #Final step of Part 1:
+    """Calcualtes probabilities"""
     try:
         return(f"{(total_true_count/(total_true_count+total_false_count) ) *100} %")
     except ZeroDivisionError:
         pass
 #main function of calculations.py
-def mathematics(close_data):
+def mathematics(close_data:list) ->None:
+    """Calcualtions for bitestock website"""
     for i in range(5,31): #days considered for comparisons 
         day = i #current day being compared to
         daily_ratio = daily_ratio_calculation(close_data)

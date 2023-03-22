@@ -1,5 +1,5 @@
 import statistics
-import random 
+import random
 from statistics import NormalDist
 
 def daily_ratio_calculation(close_data: list) ->list: 
@@ -13,7 +13,7 @@ def daily_ratio_calculation(close_data: list) ->list:
             try: 
                 daily_ratio = (current_adj_close/prev_adj_close)
                 daily_ratio_values.append(daily_ratio)
-            except:
+            except ValueError:
                 pass #weekdays/days that the market is closed
             prev_adj_close = current_adj_close
     return daily_ratio_values
@@ -29,7 +29,7 @@ def weekly_ratio_calculation(close_data: list, day: int) ->list:
                 numerator_daily = close_data[i]
                 weekly_ratio = numerator_daily/denominator_daily
                 weekly_ratio_values.append(weekly_ratio)
-            except:
+            except ValueError:
                 pass #weekdays/days that the market is closed
     return weekly_ratio_values
 
@@ -45,7 +45,7 @@ def daily_ratio_average_calculations(daily_ratio: list, day:int) ->list:
                     daily_ratio_average_sum +=daily_ratio[n]
                 daily_ratio_average = daily_ratio_average_sum/day
                 daily_ratio_average_values.append(daily_ratio_average)
-            except:
+            except IndexError:
                 pass
     return daily_ratio_average_values
 
@@ -56,7 +56,7 @@ def daily_ratio_standard_deviation_calculation(daily_ratio:list ,day:int) ->list
             try:
                 daily_ratio_standard_deviation = statistics.stdev(daily_ratio[(i-day):i])
                 daily_ratio_standard_deviation_values.append(daily_ratio_standard_deviation)
-            except:
+            except ValueError:
                 pass
     return daily_ratio_standard_deviation_values
 
@@ -67,7 +67,7 @@ def weekly_ratio_average_calculations(weekly_ratio:list) ->list: #10 day average
             try:
                 weekly_ratio_average = statistics.mean(weekly_ratio[(i-10):i])
                 weekly_ratio_average_values.append(weekly_ratio_average)
-            except:
+            except ValueError:
                 print(f"Error with {weekly_ratio[i]}")
                 pass 
     return weekly_ratio_average_values
@@ -79,7 +79,7 @@ def weekly_ratio_standard_deviation_calculation(weekly_ratio:list) ->list:
             try:
                 weekly_ratio_standard_deviation = statistics.stdev(weekly_ratio[(i-10):i])
                 weekly_ratio_standard_deviation_values.append(weekly_ratio_standard_deviation)
-            except:
+            except ValueError:
                 pass
     return weekly_ratio_standard_deviation_values
 
@@ -130,6 +130,9 @@ def simulation_and_probability_calculations(close_data, weekly_ratio_average,  w
             
             #STEPS 12
             try:
+                
+                #It has to check if each statement is false (Reason for 8 different if/else statements)
+
                 if close_data[n+10] > std_dev_plus_3: #>+3STD
                     total_true_count+=1
                 else:
@@ -162,26 +165,28 @@ def simulation_and_probability_calculations(close_data, weekly_ratio_average,  w
                     total_true_count+=1
                 else:
                     total_false_count+=1 #as previous statement was false  
-            except:
+            except ValueError:
                 pass #The close_data[n+10] has gone past available close data
-        except:
+        except IndexError:
             pass  
 
     return total_true_count, total_false_count
 
 def probability_calculation(total_true_count,total_false_count): #Final step of Part 1: 
-    return(f"{(total_true_count/(total_true_count+total_false_count) ) *100} %")
-    
+    try:
+        return(f"{(total_true_count/(total_true_count+total_false_count) ) *100} %")
+    except ZeroDivisionError:
+        pass
 #main function of calculations.py
 def mathematics(close_data):
     for i in range(5,31): #days considered for comparisons 
-        day = i
-        daily_ratio = daily_ratio_calculation(close_data) 
-        weekly_ratio = weekly_ratio_calculation(close_data,day) 
-        daily_ratio_average = daily_ratio_average_calculations(daily_ratio,day) 
-        daily_ratio_standard_deviation = daily_ratio_standard_deviation_calculation(daily_ratio,day) 
-        weekly_ratio_average = weekly_ratio_average_calculations(weekly_ratio) 
-        weekly_ratio_standard_deviation = weekly_ratio_standard_deviation_calculation(weekly_ratio) 
-        total_true_count, total_false_count = simulation_and_probability_calculations(close_data, weekly_ratio_average,  weekly_ratio_standard_deviation)  
+        day = i #current day being compared to
+        daily_ratio = daily_ratio_calculation(close_data)
+        weekly_ratio = weekly_ratio_calculation(close_data,day)
+        daily_ratio_average = daily_ratio_average_calculations(daily_ratio,day)
+        daily_ratio_standard_deviation = daily_ratio_standard_deviation_calculation(daily_ratio,day)
+        weekly_ratio_average = weekly_ratio_average_calculations(weekly_ratio)
+        weekly_ratio_standard_deviation = weekly_ratio_standard_deviation_calculation(weekly_ratio)
+        total_true_count, total_false_count = simulation_and_probability_calculations(close_data, weekly_ratio_average,  weekly_ratio_standard_deviation)
         probability =  probability_calculation(total_true_count,total_false_count)
         print(f"{probability} {i} days from now")

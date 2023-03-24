@@ -7,18 +7,17 @@ import random
 from statistics import NormalDist
 
 """Functions"""
-
-def daily_ratio_calculation(close_data: list) ->list: 
+def daily_ratio_calculation(close_data: list)->list:
     """Calculates daily ratio"""
     daily_ratio_values = []
-    prev_adj_close= close_data[0]
+    prev_adj_close = close_data[0]
     for index, current_close_data in enumerate(close_data):
         if index >=1:
             try:
                 daily_ratio = (current_close_data/prev_adj_close)
                 daily_ratio_values.append(daily_ratio)
             except ValueError:
-                pass 
+                pass
             prev_adj_close = current_close_data
     return daily_ratio_values
 

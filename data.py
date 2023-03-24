@@ -37,6 +37,7 @@ def getOCHLData(ticker, days: int) ->list:
 
     return open_days, daily_open, daily_close, daily_adj_close, daily_high, daily_low
 
+@st.cache_data
 def getRealTimeOCHL(ticker, days:int) ->list:
     """Gets Real Time Data"""
     #data = finnhub_client.quote(ticker)

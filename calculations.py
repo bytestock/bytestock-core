@@ -1,12 +1,10 @@
-"""Libraries"""
-
-#TEST EACH AGAIN AND CLEAN UP CODE, ESPECAILLY DAILY RATIO CALCULATIONS
+#Libraries
 
 import statistics
 import random
 from statistics import NormalDist
 
-"""Functions"""
+#Functions
 def daily_ratio_calculation(close_data: list)->list:
     """Calculates daily ratio"""
     daily_ratio_values = []
@@ -14,7 +12,7 @@ def daily_ratio_calculation(close_data: list)->list:
     for index, current_close_data in enumerate(close_data):
         if index >=1:
             try:
-                daily_ratio = (current_close_data/prev_adj_close)
+                daily_ratio = current_close_data/prev_adj_close
                 daily_ratio_values.append(daily_ratio)
             except ValueError:
                 pass
@@ -35,7 +33,7 @@ def weekly_ratio_calculation(close_data: list, day: int) ->list:
                 pass
     return weekly_ratio_values
 
-def daily_ratio_average_calculations(daily_ratio: list, day:int) ->list: 
+def daily_ratio_average_calculations(daily_ratio: list, day:int) ->list:
     """Calculates daily ratio average"""
     daily_ratio_average_values = []
     for index,_ in enumerate(daily_ratio):
@@ -48,7 +46,7 @@ def daily_ratio_average_calculations(daily_ratio: list, day:int) ->list:
     return daily_ratio_average_values
 
 def daily_ratio_standard_deviation_calculation(daily_ratio:list ,day:int) ->list:
-    """Calcualtes daily ratio standard deviation"""
+    """Calculates daily ratio standard deviation"""
     daily_ratio_standard_deviation_values = []
     for i in range(len(daily_ratio)):
         if i >(day-1):
@@ -60,7 +58,7 @@ def daily_ratio_standard_deviation_calculation(daily_ratio:list ,day:int) ->list
     return daily_ratio_standard_deviation_values
 
 def weekly_ratio_average_calculations(weekly_ratio:list) ->list: #10 day average
-    """Calcualtes weekly ratio average"""
+    """Calculates weekly ratio average"""
     weekly_ratio_average_values = []
     for i in range(len(weekly_ratio)):
         if i >9:
@@ -81,7 +79,7 @@ def weekly_ratio_standard_deviation_calculation(weekly_ratio:list) ->list:
     return weekly_ratio_standard_deviation_values
 
 def simulation_and_probability_calculations(close_data, weekly_ratio_average,  weekly_ratio_standard_deviation: list) ->list:
-    """Simulations and miscalaneous calcualtions"""
+    """Simulations and miscellaneous calculations"""
     simulation_average_values = []
     score_of_actual_values =[]
     normal_distribution_values = []
@@ -166,15 +164,15 @@ def simulation_and_probability_calculations(close_data, weekly_ratio_average,  w
     return total_true_count, total_false_count
 
 def probability_calculation(total_true_count,total_false_count:int) ->str: #Final step of Part 1:
-    """Calcualtes probabilities"""
+    """Calculates probabilities"""
     try:
-        return(f"{(total_true_count/(total_true_count+total_false_count) ) *100} %")
+        return f"{(total_true_count/(total_true_count+total_false_count) ) *100} %"
     except ZeroDivisionError:
         pass
 #main function of calculations.py
 def mathematics(close_data:list) ->None:
-    """Calcualtions for bitestock website"""
-    for i in range(5,6): #days considered for comparisons
+    """Calculations for bitestock website"""
+    for i in range(5,31): #days considered for comparisons
         day = i #current day being compared to
         daily_ratio = daily_ratio_calculation(close_data)
         weekly_ratio = weekly_ratio_calculation(close_data,day)
@@ -184,5 +182,5 @@ def mathematics(close_data:list) ->None:
         weekly_ratio_standard_deviation = weekly_ratio_standard_deviation_calculation(weekly_ratio)
         total_true_count, total_false_count = simulation_and_probability_calculations(close_data, weekly_ratio_average,  weekly_ratio_standard_deviation)
         probability =  probability_calculation(total_true_count,total_false_count)
-        #print(f"{probability} {i} days from now")
-        print(daily_ratio_average)
+        print(f"{probability} {i} days from now")
+        #print(daily_ratio_average)

@@ -116,6 +116,7 @@ def mathematics(close_data:list) ->None:
             falses = 0
             daily_ratio_values = []
             weekly_ratio_values = []
+            
             for index, _ in enumerate (close_data):
                 daily_ratio_values.append(daily_ratio_calculation(index, close_data))
 
@@ -135,17 +136,19 @@ def mathematics(close_data:list) ->None:
                     trues += true_count
                     falses += false_count
         
-        #   print(close_data)
-        #print(daily_ratio_values)
+            #print(close_data)
+            #print(daily_ratio_values)
 
             total_true_count.append(trues)
             total_false_count.append(falses)
+            print(len(total_false_count), total_true_count, total_false_count)
 
-        #print(day_prices)
-            #try:
-                #print(f"Probability: {(sum(total_true_count) / (sum(total_false_count) + sum(total_true_count))) * 100}%")
-            #except:
-               # pass # Div by 0
+            #print(day_prices)
+            if comparison == 15:
+                try:
+                    print(f"Probability: {(sum(total_true_count) / (sum(total_false_count) + sum(total_true_count))) * 100}%")
+                except:
+                    pass # Div by 0
             #print(weekly_ratio_values)
         
 

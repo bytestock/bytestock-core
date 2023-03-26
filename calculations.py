@@ -3,6 +3,7 @@
 import statistics
 import random
 from statistics import NormalDist
+import multiprocessing
 
 #Functions
 def daily_ratio_calculation(index: int, close_data: list)->float:
@@ -31,7 +32,7 @@ def weekly_ratio_standard_deviation_calculation(weekly_ratio_values:list) ->floa
     return weekly_ratio_average
 
 
-def simulation_and_probability_calculations(index, close_data, weekly_ratio_average,  weekly_ratio_standard_deviation: float) ->int:
+def simulation_and_probability_calculations(index, close_data, weekly_ratio_average, weekly_ratio_standard_deviation) ->int:
     """Simulations and miscellaneous calculations"""
     simulation_values = []
     true_count = 0
@@ -71,14 +72,14 @@ def simulation_and_probability_calculations(index, close_data, weekly_ratio_aver
             #STEPS 12
             #It has to check if each statement is false (Reason for 8 different if/else statements)
 
-            print(close_data[index+10], simulation_average, std_dev_plus_2, std_dev)
+            #print(close_data[index+10], simulation_average, std_dev_plus_2, std_dev)
 
             if close_data[index+10] > std_dev_plus_3: #>+3STD
                 true_count+=1
-                print('TRUE OPSITIVE')
+               # print('TRUE OPSITIVE')
             if close_data[index+10] <= std_dev_plus_3 and close_data[index+10] > std_dev_plus_2: #>+2STD
                 true_count+=1
-                print('TRUE OPSITIVE')
+               # print('TRUE OPSITIVE')
             if close_data[index+10] <= std_dev_plus_2 and close_data[index+10] > std_dev_plus_1: #>+1STD
                 false_count += 1
             if close_data[index+10] <= std_dev_plus_1 and close_data[index+10] > simulation_average: #<+1STD
@@ -89,16 +90,16 @@ def simulation_and_probability_calculations(index, close_data, weekly_ratio_aver
                 false_count+=1
             if close_data[index+10] <= std_dev_minus_2 and close_data[index+10] > std_dev_minus_3:#<-2 STD
                 true_count += 1
-                print('TRUE OPSITIVE')
+               # print('TRUE OPSITIVE')
             if close_data[index+10] < std_dev_minus_3: #<-3 STD
                 true_count+=1
-                print('TRUE OPSITIVE')
+                #print('TRUE OPSITIVE')
 
             #print(f"Total true and false count for index {close_data[index]} days considered: {true_count}, {false_count}")
             #print(true_count/(true_count+false_count))
         except IndexError: #if data 10 days from date is not available
             pass
-    
+
     return true_count, false_count
 
 
@@ -108,9 +109,9 @@ def mathematics(close_data:list) ->None:
     for current_comparison, _ in enumerate (close_data):
         total_true_count = []
         total_false_count = []
-        print('\n\nNEW CLOSE DATA VALUE\n\n')
+        #print('\n\nNEW CLOSE DATA VALUE\n\n')
         for comparison in range(5,16): #Different days considered for comparison
-            print(f'\nNEW COMPARISON RATIO: {comparison}')
+           # print(f'\nNEW COMPARISON RATIO: {comparison}')
             trues = 0
             falses = 0
             daily_ratio_values = []
@@ -127,7 +128,7 @@ def mathematics(close_data:list) ->None:
                     weekly_ratio_standard_deviation = weekly_ratio_standard_deviation_calculation(weekly_ratio_values)
                     #print(weekly_ratio_standard_deviation, comparison, index)
 
-                    #Step 5-12
+                    #Step 5-12                   
                     true_count, false_count = simulation_and_probability_calculations(index, close_data, weekly_ratio_average,  weekly_ratio_standard_deviation)
                     if true_count > 0 or false_count > 0 and close_data[index] not in day_prices:
                         day_prices.append(close_data[index])
@@ -141,10 +142,10 @@ def mathematics(close_data:list) ->None:
             total_false_count.append(falses)
 
         #print(day_prices)
-            try:
-                print((sum(total_true_count) / (sum(total_false_count) + sum(total_true_count))) * 100)
-            except:
-                pass # Div by 0
+            #try:
+                #print(f"Probability: {(sum(total_true_count) / (sum(total_false_count) + sum(total_true_count))) * 100}%")
+            #except:
+               # pass # Div by 0
             #print(weekly_ratio_values)
         
 

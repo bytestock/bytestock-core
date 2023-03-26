@@ -9,7 +9,7 @@ def daily_ratio_calculation(index: int, close_data: list)->float:
     """Calculates daily ratio"""
     if index >0 and index <len(close_data)-1:
         #try:
-        daily_ratio = close_data[index+1]/close_data[index]
+        daily_ratio = close_data[index-1]/close_data[index]
         return daily_ratio
         #except:
             #pass if condition is not met
@@ -19,15 +19,15 @@ def weekly_ratio_calculation(index,day: int, close_data: list) ->float:
     weekly_ratio = close_data[index]/close_data[index-day]
     return weekly_ratio
 
-def weekly_ratio_average_calculations(weekly_ratio_values:list) ->float: #10 day average
+def weekly_ratio_average_calculations(weekly_ratio_values:list, comparison:int) ->float: #10 day average
     """Calculates weekly ratio average"""
   
-    weekly_ratio_average = statistics.mean(weekly_ratio_values[len(weekly_ratio_values)-11:len(weekly_ratio_values)-1])
+    weekly_ratio_average = statistics.mean(weekly_ratio_values[len(weekly_ratio_values)-comparison:len(weekly_ratio_values)-1])
     return weekly_ratio_average
    
 def weekly_ratio_standard_deviation_calculation(weekly_ratio_values:list) ->float:
     """Calculates weekly ratio standard deviation"""
-    weekly_ratio_average = statistics.stdev(weekly_ratio_values[len(weekly_ratio_values)-11:len(weekly_ratio_values)-1])
+    weekly_ratio_average = statistics.stdev(weekly_ratio_values[len(weekly_ratio_values)-16:len(weekly_ratio_values)-1])
     return weekly_ratio_average
 
 
@@ -40,7 +40,7 @@ def simulation_and_probability_calculations(index, close_data, weekly_ratio_aver
     current_weekly_average = weekly_ratio_average
     current_weekly_standard_deviation = weekly_ratio_standard_deviation
     for _ in range(193):
-        simulation = (NormalDist( current_weekly_average, current_weekly_standard_deviation).inv_cdf(random.uniform(0,1))) *current_simulation_value
+        simulation = (NormalDist(current_weekly_average, current_weekly_standard_deviation).inv_cdf(random.uniform(0,1))) *current_simulation_value
         simulation_values.append(simulation)
     simulation_average = statistics.mean(simulation_values)
    
@@ -73,60 +73,67 @@ def simulation_and_probability_calculations(index, close_data, weekly_ratio_aver
 
             if close_data[index+10] > std_dev_plus_3: #>+3STD
                 true_count+=1
-            else:
-                false_count+=1 #as previous statement was false
             if close_data[index+10] <= std_dev_plus_3 and close_data[index+10] > std_dev_plus_2: #>+2STD
                 true_count+=1
-            else:
-                false_count+=1 #as previous statement was false
             if close_data[index+10] <= std_dev_plus_2 and close_data[index+10] > std_dev_plus_1: #>+1STD
-                true_count+=1
-            else:
-                false_count+=1 #as previous statement was false
+                false_count += 1
             if close_data[index+10] <= std_dev_plus_1 and close_data[index+10] > simulation_average: #<+1STD
-                true_count+=1
-            else:
-                false_count+=1 #as previous statement was false
+                false_count+=1
             if close_data[index+10] <= simulation_average and close_data[index+10] > std_dev_minus_1: #>-1 STD
-                true_count+=1
-            else:
-                false_count+=1 #as previous statement was false
+                false_count+=1
             if close_data[index+10] <= std_dev_minus_1 and close_data[index+10] > std_dev_minus_2: #<-1 STD
-                true_count+=1
-            else:
-                false_count+=1 #as previous statement was false
+                false_count+=1
             if close_data[index+10] <= std_dev_minus_2 and close_data[index+10] > std_dev_minus_3:#<-2 STD
-                true_count+=1
-            else:
-                false_count+=1 #as previous statement was false
+                true_count += 1
             if close_data[index+10] < std_dev_minus_3: #<-3 STD
                 true_count+=1
-            else:
-                false_count+=1 #as previous statement was false
 
-            print(f"Total true and false count for index {close_data[index]} days considered: {true_count}, {false_count}")
+            #print(f"Total true and false count for index {close_data[index]} days considered: {true_count}, {false_count}")
+            #print(true_count/(true_count+false_count))
         except IndexError: #if data 10 days from date is not available
             pass
+    
+    return true_count, false_count
 
 
 
 def mathematics(close_data:list) ->None:
-    #total_true_count = 0
-    #total_false_count = 0
-    
-    for day in range(5,6): #Different days considered for comparison
-        daily_ratio_values = []
-        weekly_ratio_values = []
-        for index, _ in enumerate (close_data):
-            daily_ratio_values.append(daily_ratio_calculation(index, close_data))
-            if index >= day:
-                weekly_ratio_values.append(weekly_ratio_calculation(index, day, close_data))
-            if len(weekly_ratio_values) >=11:
-                weekly_ratio_average = weekly_ratio_average_calculations(weekly_ratio_values)
-                weekly_ratio_standard_deviation = weekly_ratio_standard_deviation_calculation(weekly_ratio_values)
+    total_true_count = []
+    total_false_count = []
+    day_prices = []
+    for current_comparison, _ in enumerate (close_data):
+        print('\n\nNEW CLOSE DATA VALUE\n\n')
+        trues = 0
+        falses = 0
+        for comparison in range(5,16): #Different days considered for comparison
+            daily_ratio_values = []
+            weekly_ratio_values = []
+            for index, _ in enumerate (close_data):
+                daily_ratio_values.append(daily_ratio_calculation(index, close_data))
 
-                #Step 5-12
-                simulation_and_probability_calculations(index, close_data, weekly_ratio_average,  weekly_ratio_standard_deviation)
+                weekly_ratio_values.append(weekly_ratio_calculation(index, comparison, close_data))
+
+                if len(weekly_ratio_values) >= 16:
+                    weekly_ratio_average = weekly_ratio_average_calculations(weekly_ratio_values, comparison+1)
+                    print(weekly_ratio_average)
+                    weekly_ratio_standard_deviation = weekly_ratio_standard_deviation_calculation(weekly_ratio_values)
+
+                    #Step 5-12
+                    true_count, false_count = simulation_and_probability_calculations(index, close_data, weekly_ratio_average,  weekly_ratio_standard_deviation)
+                    if true_count > 0 or false_count > 0:
+                        day_prices.append(close_data[index])
+                    trues += true_count
+                    falses += false_count
+        
+        #   print(close_data)
+        #print(daily_ratio_values)
+
+            total_true_count.append(trues)
+            total_false_count.append(falses)
+
+        #print(day_prices)
+        #print(total_true_count, total_false_count)
+            #print(weekly_ratio_values)
         
 
 #write it so only ONE simulation average for ONE CLOSE DAY gets sent after the second enumerate 

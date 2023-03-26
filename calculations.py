@@ -1,188 +1,132 @@
-"""Libraries"""
-
-#TEST EACH AGAIN AND CLEAN UP CODE, ESPECAILLY DAILY RATIO CALCULATIONS
+#Libraries
 
 import statistics
 import random
 from statistics import NormalDist
 
-"""Functions"""
-def daily_ratio_calculation(close_data: list)->list:
+#Functions
+def daily_ratio_calculation(index: int, close_data: list)->float:
     """Calculates daily ratio"""
-    daily_ratio_values = []
-    prev_adj_close = close_data[0]
-    for index, current_close_data in enumerate(close_data):
-        if index >=1:
-            try:
-                daily_ratio = (current_close_data/prev_adj_close)
-                daily_ratio_values.append(daily_ratio)
-            except ValueError:
-                pass
-            prev_adj_close = current_close_data
-    return daily_ratio_values
+    if index >0 and index <len(close_data)-1:
+        #try:
+        daily_ratio = close_data[index+1]/close_data[index]
+        return daily_ratio
+        #except:
+            #pass if condition is not met
 
-def weekly_ratio_calculation(close_data: list, day: int) ->list:
+def weekly_ratio_calculation(index,day: int, close_data: list) ->float:
     """Calculates weekly ratio"""
-    weekly_ratio_values = []
-    for index,element in enumerate(close_data):
-        if index >=day:
-            try:
-                denominator_daily = close_data[index-day]
-                numerator_daily = element
-                weekly_ratio = numerator_daily/denominator_daily
-                weekly_ratio_values.append(weekly_ratio)
-            except ValueError:
-                pass
-    return weekly_ratio_values
+    weekly_ratio = close_data[index]/close_data[index-day]
+    return weekly_ratio
 
-def daily_ratio_average_calculations(daily_ratio: list, day:int) ->list: 
-    """Calculates daily ratio average"""
-    daily_ratio_average_values = []
-    for index,_ in enumerate(daily_ratio):
-        if index >=day:
-            try:
-                daily_ratio_average_sum = statistics.mean(daily_ratio[(index-5):index])
-                daily_ratio_average_values.append(daily_ratio_average_sum)
-            except IndexError:
-                pass
-    return daily_ratio_average_values
-
-def daily_ratio_standard_deviation_calculation(daily_ratio:list ,day:int) ->list:
-    """Calcualtes daily ratio standard deviation"""
-    daily_ratio_standard_deviation_values = []
-    for i in range(len(daily_ratio)):
-        if i >(day-1):
-            try:
-                daily_ratio_standard_deviation = statistics.stdev(daily_ratio[(i-day):i])
-                daily_ratio_standard_deviation_values.append(daily_ratio_standard_deviation)
-            except ValueError:
-                pass
-    return daily_ratio_standard_deviation_values
-
-def weekly_ratio_average_calculations(weekly_ratio:list) ->list: #10 day average
-    """Calcualtes weekly ratio average"""
-    weekly_ratio_average_values = []
-    for i in range(len(weekly_ratio)):
-        if i >9:
-            weekly_ratio_average = statistics.mean(weekly_ratio[(i-10):i])
-            weekly_ratio_average_values.append(weekly_ratio_average)
-    return weekly_ratio_average_values
-
-def weekly_ratio_standard_deviation_calculation(weekly_ratio:list) ->list:
+def weekly_ratio_average_calculations(weekly_ratio_values:list) ->float: #10 day average
+    """Calculates weekly ratio average"""
+  
+    weekly_ratio_average = statistics.mean(weekly_ratio_values[len(weekly_ratio_values)-11:len(weekly_ratio_values)-1])
+    return weekly_ratio_average
+   
+def weekly_ratio_standard_deviation_calculation(weekly_ratio_values:list) ->float:
     """Calculates weekly ratio standard deviation"""
-    weekly_ratio_standard_deviation_values = []
-    for i in range(len(weekly_ratio)):
-        if i >9:
-            try:
-                weekly_ratio_standard_deviation = statistics.stdev(weekly_ratio[(i-10):i])
-                weekly_ratio_standard_deviation_values.append(weekly_ratio_standard_deviation)
-            except ValueError:
-                pass
-    return weekly_ratio_standard_deviation_values
+    weekly_ratio_average = statistics.stdev(weekly_ratio_values[len(weekly_ratio_values)-11:len(weekly_ratio_values)-1])
+    return weekly_ratio_average
 
-def simulation_and_probability_calculations(close_data, weekly_ratio_average,  weekly_ratio_standard_deviation: list) ->list:
-    """Simulations and miscalaneous calcualtions"""
-    simulation_average_values = []
-    score_of_actual_values =[]
-    normal_distribution_values = []
-    total_true_count = 0 #total counter for trues in step 12
-    total_false_count = 0 #total counter for false in step 12
-    for index, current_simulation in enumerate(close_data):
-        simulation_values = []
+
+def simulation_and_probability_calculations(index, close_data, weekly_ratio_average,  weekly_ratio_standard_deviation: float) ->int:
+    """Simulations and miscellaneous calculations"""
+    simulation_values = []
+    true_count = 0
+    false_count = 0
+    current_simulation_value = close_data[index]
+    current_weekly_average = weekly_ratio_average
+    current_weekly_standard_deviation = weekly_ratio_standard_deviation
+    for _ in range(193):
+        simulation = (NormalDist( current_weekly_average, current_weekly_standard_deviation).inv_cdf(random.uniform(0,1))) *current_simulation_value
+        simulation_values.append(simulation)
+    simulation_average = statistics.mean(simulation_values)
+   
+    #Std Dev:
+    std_dev = statistics.stdev(simulation_values)
+
+    #abs difference
+    abs_difference = abs(close_data[index] - simulation_average)
+    if abs_difference <1:
+        std_dev_plus_3 = simulation_average + (std_dev*3)
+        std_dev_plus_2 = simulation_average + (std_dev*2)
+        std_dev_plus_1 = simulation_average + std_dev
+        std_dev_minus_1 = simulation_average - std_dev
+        std_dev_minus_2 = simulation_average - (std_dev*2)
+        std_dev_minus_3 = simulation_average - (std_dev*3)
+  
         try:
-            current_weekly_average = weekly_ratio_average[index]
-            current_weekly_standard_deviation = weekly_ratio_standard_deviation[index]
-            for _ in range(193): #runs simulation 193 times
-                simulation = (NormalDist( current_weekly_average, current_weekly_standard_deviation).inv_cdf(random.uniform(0,1))) *current_simulation
-                simulation_values.append(simulation)
-            simulation_average = sum(simulation_values)/len(simulation_values)
-            simulation_average_values.append(simulation_average)
-
-            #Std Dev:
-            std_dev = statistics.stdev(simulation_values)
-            std_dev_plus_3 = simulation_average + (std_dev*3)
-            std_dev_plus_2 = simulation_average + (std_dev*2)
-            std_dev_plus_1 = simulation_average + std_dev
-            std_dev_minus_1 = simulation_average - std_dev
-            std_dev_minus_2 = simulation_average - (std_dev*2)
-            std_dev_minus_3 = simulation_average - (std_dev*3)
-
             #Score of Actual:
             score_of_actual = (close_data[index+10]-simulation_average)/std_dev
-            score_of_actual_values.append(score_of_actual)
 
             #Percentage
             close_data_in_10_days = close_data[index+10]
             if score_of_actual > 0 :
-                percentage = (1 - NormalDist(simulation_average, std_dev).cdf(close_data_in_10_days)) *100                                              
-                normal_distribution_values.append(percentage)
+                percentage = (1 - NormalDist(simulation_average, std_dev).cdf(close_data_in_10_days)) *100                        
             else:
-                percentage =  NormalDist(simulation_average, std_dev).cdf(close_data_in_10_days) *100                                           
-                normal_distribution_values.append(percentage)
-
-            
+                percentage =  NormalDist(simulation_average, std_dev).cdf(close_data_in_10_days) *100
+        
             #STEPS 12
-            try:
-            
-                #It has to check if each statement is false (Reason for 8 different if/else statements)
+            #It has to check if each statement is false (Reason for 8 different if/else statements)
 
-                if close_data[index+10] > std_dev_plus_3: #>+3STD
-                    total_true_count+=1
-                else:
-                    total_false_count+=1 #as previous statement was false
-                if close_data[index+10] <= std_dev_plus_3 and close_data[index+10] > std_dev_plus_2: #>+2STD
-                    total_true_count+=1
-                else:
-                    total_false_count+=1 #as previous statement was false
-                if close_data[index+10] <= std_dev_plus_2 and close_data[index+10] > std_dev_plus_1: #>+1STD
-                    total_true_count+=1
-                else:
-                    total_false_count+=1 #as previous statement was false
-                if close_data[index+10] <= std_dev_plus_1 and close_data[index+10] > simulation_average: #<+1STD
-                    total_true_count+=1
-                else:
-                    total_false_count+=1 #as previous statement was false
-                if close_data[index+10] <= simulation_average and close_data[index+10] > std_dev_minus_1: #>-1 STD
-                    total_true_count+=1
-                else:
-                    total_false_count+=1 #as previous statement was false
-                if close_data[index+10] <= std_dev_minus_1 and close_data[index+10] > std_dev_minus_2: #<-1 STD
-                    total_true_count+=1
-                else:
-                    total_false_count+=1 #as previous statement was false
-                if close_data[index+10] <= std_dev_minus_2 and close_data[index+10] > std_dev_minus_3:#<-2 STD
-                    total_true_count+=1
-                else:
-                    total_false_count+=1 #as previous statement was false
-                if close_data[index+10] < std_dev_minus_3: #<-3 STD
-                    total_true_count+=1
-                else:
-                    total_false_count+=1 #as previous statement was false
-            except ValueError:
-                pass #The close_data[n+10] has gone past available close data
-        except IndexError:
+            if close_data[index+10] > std_dev_plus_3: #>+3STD
+                true_count+=1
+            else:
+                false_count+=1 #as previous statement was false
+            if close_data[index+10] <= std_dev_plus_3 and close_data[index+10] > std_dev_plus_2: #>+2STD
+                true_count+=1
+            else:
+                false_count+=1 #as previous statement was false
+            if close_data[index+10] <= std_dev_plus_2 and close_data[index+10] > std_dev_plus_1: #>+1STD
+                true_count+=1
+            else:
+                false_count+=1 #as previous statement was false
+            if close_data[index+10] <= std_dev_plus_1 and close_data[index+10] > simulation_average: #<+1STD
+                true_count+=1
+            else:
+                false_count+=1 #as previous statement was false
+            if close_data[index+10] <= simulation_average and close_data[index+10] > std_dev_minus_1: #>-1 STD
+                true_count+=1
+            else:
+                false_count+=1 #as previous statement was false
+            if close_data[index+10] <= std_dev_minus_1 and close_data[index+10] > std_dev_minus_2: #<-1 STD
+                true_count+=1
+            else:
+                false_count+=1 #as previous statement was false
+            if close_data[index+10] <= std_dev_minus_2 and close_data[index+10] > std_dev_minus_3:#<-2 STD
+                true_count+=1
+            else:
+                false_count+=1 #as previous statement was false
+            if close_data[index+10] < std_dev_minus_3: #<-3 STD
+                true_count+=1
+            else:
+                false_count+=1 #as previous statement was false
+
+            print(f"Total true and false count for index {close_data[index]} days considered: {true_count}, {false_count}")
+        except IndexError: #if data 10 days from date is not available
             pass
 
-    return total_true_count, total_false_count
 
-def probability_calculation(total_true_count,total_false_count:int) ->str: #Final step of Part 1:
-    """Calcualtes probabilities"""
-    try:
-        return(f"{(total_true_count/(total_true_count+total_false_count) ) *100} %")
-    except ZeroDivisionError:
-        pass
-#main function of calculations.py
+
 def mathematics(close_data:list) ->None:
-    """Calcualtions for bitestock website"""
-    for i in range(5,6): #days considered for comparisons
-        day = i #current day being compared to
-        daily_ratio = daily_ratio_calculation(close_data)
-        weekly_ratio = weekly_ratio_calculation(close_data,day)
-        daily_ratio_average = daily_ratio_average_calculations(daily_ratio,day) 
-        daily_ratio_standard_deviation = daily_ratio_standard_deviation_calculation(daily_ratio,day)
-        weekly_ratio_average = weekly_ratio_average_calculations(weekly_ratio)
-        weekly_ratio_standard_deviation = weekly_ratio_standard_deviation_calculation(weekly_ratio)
-        total_true_count, total_false_count = simulation_and_probability_calculations(close_data, weekly_ratio_average,  weekly_ratio_standard_deviation)
-        probability =  probability_calculation(total_true_count,total_false_count)
-        #print(f"{probability} {i} days from now")
-        print(daily_ratio_average)
+    #total_true_count = 0
+    #total_false_count = 0
+    
+    for day in range(5,6): #Different days considered for comparison
+        daily_ratio_values = []
+        weekly_ratio_values = []
+        for index, _ in enumerate (close_data):
+            daily_ratio_values.append(daily_ratio_calculation(index, close_data))
+            if index >= day:
+                weekly_ratio_values.append(weekly_ratio_calculation(index, day, close_data))
+            if len(weekly_ratio_values) >=11:
+                weekly_ratio_average = weekly_ratio_average_calculations(weekly_ratio_values)
+                weekly_ratio_standard_deviation = weekly_ratio_standard_deviation_calculation(weekly_ratio_values)
+
+                #Step 5-12
+                simulation_and_probability_calculations(index, close_data, weekly_ratio_average,  weekly_ratio_standard_deviation)
+        
+
+#write it so only ONE simulation average for ONE CLOSE DAY gets sent after the second enumerate 

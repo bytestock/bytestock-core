@@ -28,7 +28,7 @@ One other inquiry:
 
 - Upon running the program, the values that are being printed vary pretty significantly, being up to 20% different on each run. Is this expected? To avoid this, should I run the program a couple dozen or hundred times and calculate an average?
 */
-/*
+
 	func readLines(path string) ([]float64, error) {
 		file, err := os.Open(path)
 		if err != nil {
@@ -47,7 +47,7 @@ One other inquiry:
 		}
 		return lines, scanner.Err()
 	}
-*/
+
 
 func sum(arr []int) float64 {
 	sum := 0.0
@@ -79,7 +79,7 @@ func average(array []float64) float64 {
 func normalDist(weekly_ratio_average float64, weekly_ratio_standard_deviation float64) float64 {
 	// Create a normal distribution
 
-	r := 0 + rand.Float64()*(1-0)
+	r := rand.Float64()
 
 	dist := distuv.Normal{
 		Mu:    weekly_ratio_average,
@@ -106,7 +106,7 @@ func daily_ratio_calculation(index int, close_data []float64) float64 {
 	return 0.0
 }*/
 
-func weekly_ratio_calculation(index int, day int, close_data []float64) float64 {
+func weekly_ratio_calculation(index int, close_data []float64) float64 {
 	weekly_ratio := close_data[index] / close_data[int(math.Abs(float64(index-5)))]
 
 	return weekly_ratio
@@ -135,9 +135,9 @@ func simulation_and_probability_calculations(index int, close_data []float64, we
 	current_weekly_average := weekly_ratio_average
 	current_weekly_standard_deviation := weekly_ratio_standard_deviation
 
-	for x := 0; x <= 193; x++ {
-		simultaion := normalDist(current_weekly_average, current_weekly_standard_deviation) * current_simulation_value
-		simulation_values = append(simulation_values, simultaion)
+	for x := 0; x <= 2000; x++ {
+		simulation := normalDist(current_weekly_average, current_weekly_standard_deviation) * current_simulation_value
+		simulation_values = append(simulation_values, simulation)
 	}
 
 	simulation_average := average(simulation_values)
@@ -150,38 +150,23 @@ func simulation_and_probability_calculations(index int, close_data []float64, we
 	abs_difference := math.Abs(close_data[index] - simulation_average)
 
 	if abs_difference < 1 {
-		std_dev_plus_3 := simulation_average + (std_dev * 3)
+		//std_dev_plus_3 := simulation_average + (std_dev * 3)
 		std_dev_plus_2 := simulation_average + (std_dev * 2)
-		std_dev_plus_1 := simulation_average + std_dev
-		std_dev_minus_1 := simulation_average - std_dev
+		//std_dev_plus_1 := simulation_average + std_dev
+		//std_dev_minus_1 := simulation_average - std_dev
 		std_dev_minus_2 := simulation_average - (std_dev * 2)
-		std_dev_minus_3 := simulation_average - (std_dev * 3)
+		//std_dev_minus_3 := simulation_average - (std_dev * 3)
 
 		if len(close_data) > index+period {
 			val_in_ten_days := close_data[index+period]
 
-			if val_in_ten_days > std_dev_plus_3 {
+			fmt.Println(val_in_ten_days, std_dev_plus_2, std_dev_minus_2)
+
+			if val_in_ten_days > std_dev_plus_2 {
 				true_count += 1
-			}
-			if val_in_ten_days <= std_dev_plus_3 && val_in_ten_days > std_dev_plus_2 {
-				true_count += 1
-			}
-			if val_in_ten_days <= std_dev_plus_2 && val_in_ten_days > std_dev_plus_1 {
+			} else if val_in_ten_days <= std_dev_plus_2 && val_in_ten_days >= std_dev_minus_2 {
 				false_count += 1
-			}
-			if val_in_ten_days <= std_dev_plus_1 && val_in_ten_days > simulation_average {
-				false_count += 1
-			}
-			if val_in_ten_days <= simulation_average && val_in_ten_days > std_dev_minus_1 {
-				false_count += 1
-			}
-			if val_in_ten_days <= std_dev_minus_1 && val_in_ten_days > std_dev_minus_2 {
-				false_count += 1
-			}
-			if val_in_ten_days <= std_dev_minus_2 && val_in_ten_days > std_dev_minus_3 {
-				true_count += 1
-			}
-			if val_in_ten_days < std_dev_minus_3 {
+			} else if val_in_ten_days < std_dev_minus_2 {
 				true_count += 1
 			}
 		}
@@ -192,7 +177,8 @@ func simulation_and_probability_calculations(index int, close_data []float64, we
 }
 
 func main() {
-	close_data := []float64{381.81280517578125, 378.5751647949219, 379.09320068359375, 384.7615661621094, 379.2724914550781, 381.4541931152344, 379.9499206542969, 375.2279357910156, 381.982177734375, 380.9759826660156, 379.37213134765625, 382.30096435546875, 377.9375915527344, 386.6044921875, 386.3853454589844, 389.0950012207031, 394.0162353515625, 395.45074462890625, 396.9848937988281, 396.2576599121094, 390.0015563964844, 387.16241455078125, 394.3748779296875, 399.1068115234375, 398.6784362792969, 398.827880859375, 403.2111511230469, 404.1376037597656, 399.06695556640625, 404.9345703125, 409.2381286621094, 415.1954040527344, 410.7822570800781, 408.2718200683594, 413.6114501953125, 409.0887145996094, 405.542236328125, 406.4886474609375, 411.2604064941406, 411.0711669921875, 412.40606689453125, 406.72772216796875, 405.71160888671875, 397.5726623535156, 397.0247497558594, 399.1366882324219, 394.8729553222656, 396.21783447265625, 394.75341796875, 393.23919677734375, 396.2975158691406, 402.65325927734375, 402.9322204589844, 396.7557678222656, 397.4033203125, 390.0712890625, 384.4427795410156, 383.89483642578125, 390.24066162109375, 387.7999572753906, 394.6039733886719, 389.989990234375, 393.739990234375, 398.9100036621094, 392.1099853515625, 393.1700134277344, 395.75}
+	//close_data := []float64{381.81280517578125, 378.5751647949219, 379.09320068359375, 384.7615661621094, 379.2724914550781, 381.4541931152344, 379.9499206542969, 375.2279357910156, 381.982177734375, 380.9759826660156, 379.37213134765625, 382.30096435546875, 377.9375915527344, 386.6044921875, 386.3853454589844, 389.0950012207031, 394.0162353515625, 395.45074462890625, 396.9848937988281, 396.2576599121094, 390.0015563964844, 387.16241455078125, 394.3748779296875, 399.1068115234375, 398.6784362792969, 398.827880859375, 403.2111511230469, 404.1376037597656, 399.06695556640625, 404.9345703125, 409.2381286621094, 415.1954040527344, 410.7822570800781, 408.2718200683594, 413.6114501953125, 409.0887145996094, 405.542236328125, 406.4886474609375, 411.2604064941406, 411.0711669921875, 412.40606689453125, 406.72772216796875, 405.71160888671875, 397.5726623535156, 397.0247497558594, 399.1366882324219, 394.8729553222656, 396.21783447265625, 394.75341796875, 393.23919677734375, 396.2975158691406, 402.65325927734375, 402.9322204589844, 396.7557678222656, 397.4033203125, 390.0712890625, 384.4427795410156, 383.89483642578125, 390.24066162109375, 387.7999572753906, 394.6039733886719, 389.989990234375, 393.739990234375, 398.9100036621094, 392.1099853515625, 393.1700134277344, 395.75}
+	close_data := readLines("close-data.txt")
 	//for current_comparison := 0; current_comparison < len(close_data); current_comparison++ {
 	var total_true_count []int
 	var total_false_count []int
@@ -205,10 +191,12 @@ func main() {
 
 		//daily_ratio_values = nil
 		weekly_ratio_values = nil
+		total_true_count = nil
+		total_false_count = nil
 
-		for index := period; index < len(close_data); index++ {
+		for index := 5; index < len(close_data); index++ {
 			//daily_ratio_values = append(daily_ratio_values, daily_ratio_calculation(index, close_data))
-			weekly_ratio_values = append(weekly_ratio_values, weekly_ratio_calculation(index, period, close_data))
+			weekly_ratio_values = append(weekly_ratio_values, weekly_ratio_calculation(index, close_data))
 
 			if len(weekly_ratio_values) >= period {
 				weekly_ratio_average := weekly_ratio_average_calculations(weekly_ratio_values, period)
@@ -217,12 +205,13 @@ func main() {
 				true_count, false_count := simulation_and_probability_calculations(index, close_data, weekly_ratio_average, weekly_ratio_standard_deviation, period)
 				trues += true_count
 				falses += false_count
+				fmt.Println(trues,falses)
 			}
 		}
 		total_true_count = append(total_true_count, trues)
 		total_false_count = append(total_false_count, falses)
 
-		//fmt.Println(len(total_false_count), total_true_count, total_false_count)
+		fmt.Println(sum(total_true_count), sum(total_false_count))
 		fmt.Println("Period: ", period, "Probability: ", (sum(total_true_count)/(sum(total_true_count)+sum(total_false_count)))*100, "%")
 		//fmt.Println(len(total_false_count))
 

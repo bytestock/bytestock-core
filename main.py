@@ -14,7 +14,11 @@ def main()->None:
         except ValueError:
             print("Enter a valid amount of days")
     open_days, daily_open, daily_close, daily_adj_close, daily_high, daily_low = data.getOCHLData(user_input, days) #Not close data, rather, open; we need Adj Close
-    print(daily_adj_close)
+    with open("close-data.txt", "w") as f:
+        for val in daily_adj_close:
+            f.write(str(val)+"\n")
+        f.close()
+
     calculations.mathematics(daily_adj_close)
 
 """Main Program"""

@@ -180,7 +180,7 @@ func main() {
 		total_true_count = nil
 		total_false_count = nil
 
-		for comparison := 5; comparison <= 16; comparison++ {
+		for comparison := 5; comparison <= 30; comparison++ {
 			trues := 0
 			falses := 0
 
@@ -194,7 +194,7 @@ func main() {
 				daily_ratio_values = append(daily_ratio_values, daily_ratio_calculation(index, close_data))
 				weekly_ratio_values = append(weekly_ratio_values, weekly_ratio_calculation(index, comparison, close_data))
 
-				if len(weekly_ratio_values) >= 16 {
+				if len(weekly_ratio_values) >= 11 {
 					weekly_ratio_average := weekly_ratio_average_calculations(weekly_ratio_values)
 					weekly_ratio_standard_deviation := weekly_ratio_standard_deviation_calculation(weekly_ratio_values)
 
@@ -210,12 +210,9 @@ func main() {
 				if sum(total_false_count) == 0 && sum(total_true_count) == 0 {
 					total_false_count = append(total_false_count, 1)
 				}*/
-
-			if comparison == 16 {
-				fmt.Println(len(total_false_count), total_true_count, total_false_count)
-				fmt.Println((sum(total_true_count) / (sum(total_true_count) + sum(total_false_count))) * 100)
-				//fmt.Println(len(total_false_count))
-			}
+			//fmt.Println(len(total_false_count), total_true_count, total_false_count)
+			fmt.Println("Date: ", close_data[current_comparison], "Comparison Ratio: ", comparison, "Probability: ", (sum(total_true_count)/(sum(total_true_count)+sum(total_false_count)))*100, "%")
+			//fmt.Println(len(total_false_count))
 
 		}
 	}

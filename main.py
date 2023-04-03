@@ -1,6 +1,7 @@
 """Libraries"""
 import calculations # importing the calculations module to use its functions
 import data # importing the data module to use its functions
+import subprocess
 
 
 def main()->None: # creating the main() functions
@@ -19,7 +20,14 @@ def main()->None: # creating the main() functions
             f.write(str(val)+"\n")
         f.close()
 
-    calculations.mathematics(daily_adj_close)
+    #calculations.mathematics(daily_adj_close)
+    args = ("./calc")
+    popen = subprocess.Popen(args, stdout=subprocess.PIPE)
+    popen.wait()
+    output = popen.stdout.readlines()
+    with open('output.txt', 'w') as f:
+        for output_line in output:
+            f.write(output_line)
 
 """Main Program"""
 if __name__ == "__main__":

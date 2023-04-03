@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"log"
 	"math"
 	"math/rand"
@@ -220,7 +221,7 @@ func main() {
 		total_false_count = append(total_false_count, falses)
 
 		//fmt.Println(sum(total_true_count), sum(total_false_count))
-		//fmt.Println("Period: ", period, "Probability: ", (sum(total_true_count)/(sum(total_true_count)+sum(total_false_count)))*100, "%")
+		fmt.Println("Period:", period, "Probability:", (sum(total_true_count)/(sum(total_true_count)+sum(total_false_count)))*100, "%")
 		//fmt.Println(len(total_false_count))
 
 	}

@@ -1,7 +1,8 @@
-package main
+package main // package main
 
-import (
+import ( // import all the libraries needed
 	"bufio"
+	"fmt"
 	"log"
 	"math"
 	"math/rand"
@@ -12,53 +13,34 @@ import (
 	"gonum.org/v1/gonum/stat/distuv"
 )
 
-/*
-PLEASE READ:
-
-I have modified the program according to your comments. A few things:
-
-1. The data is hard coded for right now. This will be relatively easy to fix, I just needed to run the program on the exact same values every time to ensure changes in results were from the program, not differing close data.
-2. I have changed all mentions of "comparison" to "period".
-3. The calculation of probability now runs on every period, and prints out exactly 25 lines (one for each period 5 through 30).
-4. I have commented out daily ratios, once everything is working, I will delete them and clean up the entire program.
-5. I have changed the weekly ratios to run against the 5th day every time. However, I cannot move this to outside the loop because it depends upon the variable "index". With every iteration of the loop, the index changes, and the data changes as well.
-6. I have incorporated the period variable into these calculations.
-7. I have updated the val_in_ten_days variable to include the period variable.
-8. I am aware of the "mess" the if statements are right now. However, until the program is working 100%, I would like to keep them like this, as it makes it easier to debug. Once everything else is confirmed as working, I will change the if statements.
-
-One other inquiry:
-
-- Upon running the program, the values that are being printed vary pretty significantly, being up to 20% different on each run. Is this expected? To avoid this, should I run the program a couple dozen or hundred times and calculate an average?
-*/
-
-func readLines(path string) ([]string, error) {
-	file, err := os.Open(path)
+func readLines(path string) ([]string, error) { // create a function readLines that reads a file and returns the lines read
+	file, err := os.Open(path) // open the file and handle the error
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
+	defer file.Close() // close the file once we have the contents read to memory
 
-	var lines []string
-	scanner := bufio.NewScanner(file)
+	var lines []string                // create an array to hold the lines
+	scanner := bufio.NewScanner(file) // read the contents of the file
 	if err != nil {
 		log.Fatal(err)
 	}
-	for scanner.Scan() {
+	for scanner.Scan() { // append each line to lines array
 		lines = append(lines, scanner.Text())
 	}
-	return lines, scanner.Err()
+	return lines, scanner.Err() // return the lines read and any errors generated
 }
 
-func sum(arr []int) float64 {
-	sum := 0.0
-	for _, valueInt := range arr {
+func sum(arr []int) float64 { // create a function that returns the sum of an array
+	sum := 0.0                     // create a variable to house the sum
+	for _, valueInt := range arr { // loop through the array and add each float to the sum variable
 		sum += float64(valueInt)
 	}
-	return sum
+	return sum // return the sum
 }
 
-func average(array []float64) float64 {
-	sum := 0.0
+func average(array []float64) float64 { // create a function that returns the average of an array
+	sum := 0.0 // create a variable to house the sum of an array
 
 	// traversing through the
 	// array using for loop
@@ -73,157 +55,125 @@ func average(array []float64) float64 {
 	// avg to find the average
 	avg := (float64(sum)) / (float64(len(array)))
 
-	return avg
+	return avg // return the average
 }
 
-func normalDist(weekly_ratio_average float64, weekly_ratio_standard_deviation float64) float64 {
+func normalDist(weekly_ratio_average float64, weekly_ratio_standard_deviation float64) float64 { // create a function to create a normal distribution based on a number of inputs
 	// Create a normal distribution
 
-	r := rand.Float64()
+	r := rand.Float64() // create a random 64 bit floating point number
 
-	dist := distuv.Normal{
+	dist := distuv.Normal{ // use the distuv library to create a normal distribution
 		Mu:    weekly_ratio_average,
 		Sigma: weekly_ratio_standard_deviation,
 	}.Quantile(r)
 
-	//data := make([]float64, 1e5)
-
-	/*// Draw some random values from the standard normal distribution
-	for i := range data {
-		data[i] = dist.Rand()
-	}*/
-
-	return dist
+	return dist // return the value generated
 
 }
 
-/*
-func daily_ratio_calculation(index int, close_data []float64) float64 {
-	if index > 0 && index < (len(close_data)-1) {
-		daily_ratio := close_data[index-1] / close_data[index]
-		return daily_ratio
-	}
-	return 0.0
-}*/
+func weekly_ratio_calculation(index int, close_data []float64) float64 { // create a function to calculate the weekly ratios
+	weekly_ratio := close_data[index] / close_data[int(math.Abs(float64(index-5)))] // calculate the weekly ratio
 
-func weekly_ratio_calculation(index int, close_data []float64) float64 {
-	weekly_ratio := close_data[index] / close_data[int(math.Abs(float64(index-5)))]
-
-	return weekly_ratio
+	return weekly_ratio // return value generated
 }
 
-func weekly_ratio_average_calculations(weekly_ratio_values []float64, comparison int) float64 {
-	weekly_ratio_average := average(weekly_ratio_values[len(weekly_ratio_values)-comparison : len(weekly_ratio_values)-1])
+func weekly_ratio_average_calculations(weekly_ratio_values []float64, comparison int) float64 { // create a function to calulate the average weekly ratio
+	weekly_ratio_average := average(weekly_ratio_values[len(weekly_ratio_values)-comparison : len(weekly_ratio_values)-1]) // calculate the weekly average ratio
 
-	return weekly_ratio_average
+	return weekly_ratio_average // return value generated
 }
 
-func weekly_ratio_standard_deviation_calculation(weekly_ratio_values []float64, comparison int) float64 {
-	weekly_ratio_std, err := stats.StandardDeviation(weekly_ratio_values[len(weekly_ratio_values)-comparison : len(weekly_ratio_values)-1])
+func weekly_ratio_standard_deviation_calculation(weekly_ratio_values []float64, comparison int) float64 { // create a function to calculate the weekly standard deviation
+	weekly_ratio_std, err := stats.StandardDeviation(weekly_ratio_values[len(weekly_ratio_values)-comparison : len(weekly_ratio_values)-1]) // calculate the std_dev and parse the error
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return weekly_ratio_std
+	return weekly_ratio_std // return value generated
 }
 
-func simulation_and_probability_calculations(index int, close_data []float64, weekly_ratio_average float64, weekly_ratio_standard_deviation float64, period int) (int, int) {
-	var simulation_values []float64
-	true_count := 0
+func simulation_and_probability_calculations(index int, close_data []float64, weekly_ratio_average float64, weekly_ratio_standard_deviation float64, period int) (int, int) { // create a function that runs the main simulation
+	var simulation_values []float64 // create an array to house the simulation values
+	true_count := 0                 // create variables for true and false counts
 	false_count := 0
-	current_simulation_value := close_data[index]
-	current_weekly_average := weekly_ratio_average
-	current_weekly_standard_deviation := weekly_ratio_standard_deviation
+	current_simulation_value := close_data[index]                        // get the currenty value
+	current_weekly_average := weekly_ratio_average                       //  get the current weekly average
+	current_weekly_standard_deviation := weekly_ratio_standard_deviation // get the current weekly standard deviation
 
-	for x := 0; x <= 100000; x++ {
-		simulation := normalDist(current_weekly_average, current_weekly_standard_deviation) * current_simulation_value
-		simulation_values = append(simulation_values, simulation)
+	for x := 0; x <= 3000; x++ { // run the simulation 3000 times
+		simulation := normalDist(current_weekly_average, current_weekly_standard_deviation) * current_simulation_value // run the simulation
+		simulation_values = append(simulation_values, simulation)                                                      // append the simulated value to the above array
 	}
 
-	simulation_average := average(simulation_values)
+	simulation_average := average(simulation_values) // calculate the average of the simulation
 
-	std_dev, err := stats.StandardDeviation(simulation_values)
+	std_dev, err := stats.StandardDeviation(simulation_values) // calculate the standard deviation of the simulation
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	abs_difference := math.Abs(close_data[index] - simulation_average)
+	abs_difference := math.Abs(close_data[index] - simulation_average) // calculate the absolute difference
 
-	if abs_difference < 1 {
-		//std_dev_plus_3 := simulation_average + (std_dev * 3)
-		std_dev_plus_2 := simulation_average + (std_dev * 2)
-		//std_dev_plus_1 := simulation_average + std_dev
-		//std_dev_minus_1 := simulation_average - std_dev
-		std_dev_minus_2 := simulation_average - (std_dev * 2)
-		//std_dev_minus_3 := simulation_average - (std_dev * 3)
+	if abs_difference < 1 { // if the difference is less than one, the run the following:
+		std_dev_plus_2 := simulation_average + (std_dev * 2)  // calculate what the std plus 2 would be
+		std_dev_minus_2 := simulation_average - (std_dev * 2) // calculate what the std minus 2 would be
 
-		if len(close_data) > index+period {
-			val_in_ten_days := close_data[index+period]
+		if len(close_data) > index+period { // only continue if there are enough values in close data
+			val_in_ten_days := close_data[index+period] // check the value in n days
 
-			//fmt.Println(val_in_ten_days, std_dev_plus_2, std_dev_minus_2)
-
-			if val_in_ten_days > std_dev_plus_2 {
+			if val_in_ten_days > std_dev_plus_2 { // if it is outside the std dev plus 2
 				true_count += 1
-			} else if val_in_ten_days <= std_dev_plus_2 && val_in_ten_days >= std_dev_minus_2 {
+			} else if val_in_ten_days <= std_dev_plus_2 && val_in_ten_days >= std_dev_minus_2 { // if it is within two standard deviations
 				false_count += 1
-			} else if val_in_ten_days < std_dev_minus_2 {
+			} else if val_in_ten_days < std_dev_minus_2 { // if it is outside the std dev minus 2
 				true_count += 1
 			}
 		}
 	}
 
-	return true_count, false_count
+	return true_count, false_count // return the true and false count
 
 }
 
 func main() {
-	//close_data := []float64{381.81280517578125, 378.5751647949219, 379.09320068359375, 384.7615661621094, 379.2724914550781, 381.4541931152344, 379.9499206542969, 375.2279357910156, 381.982177734375, 380.9759826660156, 379.37213134765625, 382.30096435546875, 377.9375915527344, 386.6044921875, 386.3853454589844, 389.0950012207031, 394.0162353515625, 395.45074462890625, 396.9848937988281, 396.2576599121094, 390.0015563964844, 387.16241455078125, 394.3748779296875, 399.1068115234375, 398.6784362792969, 398.827880859375, 403.2111511230469, 404.1376037597656, 399.06695556640625, 404.9345703125, 409.2381286621094, 415.1954040527344, 410.7822570800781, 408.2718200683594, 413.6114501953125, 409.0887145996094, 405.542236328125, 406.4886474609375, 411.2604064941406, 411.0711669921875, 412.40606689453125, 406.72772216796875, 405.71160888671875, 397.5726623535156, 397.0247497558594, 399.1366882324219, 394.8729553222656, 396.21783447265625, 394.75341796875, 393.23919677734375, 396.2975158691406, 402.65325927734375, 402.9322204589844, 396.7557678222656, 397.4033203125, 390.0712890625, 384.4427795410156, 383.89483642578125, 390.24066162109375, 387.7999572753906, 394.6039733886719, 389.989990234375, 393.739990234375, 398.9100036621094, 392.1099853515625, 393.1700134277344, 395.75}
-	data, err := readLines("close-data.txt")
+	data, err := readLines("close-data.txt") // read the data from close-data
 	if err != nil {
 		log.Fatal(err)
 	}
-	var close_data []float64
-	for _, element := range data {
-		element, _ := strconv.ParseFloat(element, 64)
+	var close_data []float64       // create a variable close_data
+	for _, element := range data { // loop through the data array
+		element, _ := strconv.ParseFloat(element, 64) // convert each line to a float value
 		close_data = append(close_data, element)
 	}
-	//for current_comparison := 0; current_comparison < len(close_data); current_comparison++ {
-	var total_true_count []int
+
+	var total_true_count []int // create a variable for true and false counts
 	var total_false_count []int
-	for period := 5; period <= 30; period++ {
-		trues := 0
+	for period := 5; period <= 30; period++ { // loop through a period of 5 to 30 days
+		trues := 0 // calculate the trues and falses
 		falses := 0
 
-		//var daily_ratio_values []float64
-		var weekly_ratio_values []float64
+		var weekly_ratio_values []float64 // house the weekly ratio values in an array
 
-		//daily_ratio_values = nil
-		weekly_ratio_values = nil
+		weekly_ratio_values = nil // set all the values to nil
 		total_true_count = nil
 		total_false_count = nil
 
-		for index := 5; index < len(close_data); index++ {
-			//daily_ratio_values = append(daily_ratio_values, daily_ratio_calculation(index, close_data))
-			weekly_ratio_values = append(weekly_ratio_values, weekly_ratio_calculation(index, close_data))
+		for index := 5; index < len(close_data); index++ { // run a loop over the entire close data list
+			weekly_ratio_values = append(weekly_ratio_values, weekly_ratio_calculation(index, close_data)) // append the weekly ratios
 
-			if len(weekly_ratio_values) >= period {
-				weekly_ratio_average := weekly_ratio_average_calculations(weekly_ratio_values, period)
+			if len(weekly_ratio_values) >= period { // if there are enough values in the list, run the simulation
+				weekly_ratio_average := weekly_ratio_average_calculations(weekly_ratio_values, period) // get the average and standard deviation
 				weekly_ratio_standard_deviation := weekly_ratio_standard_deviation_calculation(weekly_ratio_values, period)
 
-				true_count, false_count := simulation_and_probability_calculations(index, close_data, weekly_ratio_average, weekly_ratio_standard_deviation, period)
-				trues += true_count
+				true_count, false_count := simulation_and_probability_calculations(index, close_data, weekly_ratio_average, weekly_ratio_standard_deviation, period) // run the simulation
+				trues += true_count                                                                                                                                  // add the trues and falses
 				falses += false_count
-				//fmt.Println(trues, falses)
 			}
 		}
-		total_true_count = append(total_true_count, trues)
-		total_false_count = append(total_false_count, falses)
+		total_true_count = append(total_true_count, trues)    // add the total true count to the trues
+		total_false_count = append(total_false_count, falses) // add the total false count to the falses
 
-		//fmt.Println(sum(total_true_count), sum(total_false_count))
-		//fmt.Println("Period: ", period, "Probability: ", (sum(total_true_count)/(sum(total_true_count)+sum(total_false_count)))*100, "%")
-		//fmt.Println(len(total_false_count))
-
+		fmt.Println("Period:", period, "Probability:", (sum(total_true_count)/(sum(total_true_count)+sum(total_false_count)))*100, "%") // print the results of the simulation on each period
 	}
 }
-
-//}

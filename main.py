@@ -4,8 +4,9 @@ import data # importing the data module to use its functions
 import subprocess
 
 
-def main()->None: # creating the main() functions
+def main(stock, days)->None: # creating the main() functions
     """Main Function"""
+    """
     while True: # infinite loop
         try: # ensuring that the user enters a valid number
             user_input = input("Enter a stock: ") # asking the user to enter a stock
@@ -14,7 +15,9 @@ def main()->None: # creating the main() functions
                 break
         except ValueError: # asking the user to enter a valid number of days
             print("Enter a valid amount of days")
-    open_days, daily_open, daily_close, daily_adj_close, daily_high, daily_low = data.getOCHLData(user_input, days) #Not close data, rather, open; we need Adj Close
+    """
+
+    open_days, daily_open, daily_close, daily_adj_close, daily_high, daily_low = data.getOCHLData(stock, days) #Not close data, rather, open; we need Adj Close
     with open("close-data.txt", "w") as f:
         for val in daily_adj_close:
             f.write(str(val)+"\n")

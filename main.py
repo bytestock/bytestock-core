@@ -27,7 +27,12 @@ def main()->None: # creating the main() functions
     output = popen.stdout.readlines()
     with open('output.txt', 'w') as f:
         for output_line in output:
-            f.write(output_line)
+            output_line = str(output_line)
+            period = output_line.split(' ')[1].split(' ')[0]
+            probability = output_line.split(' ')[3].split(' ')[0]
+
+            newline = f'Period:{period}:Probability:{probability}\n'
+            f.write(newline)
 
 """Main Program"""
 if __name__ == "__main__":

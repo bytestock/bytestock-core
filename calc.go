@@ -136,7 +136,7 @@ func simulation_and_probability_calculations(index int, close_data []float64, we
 	current_weekly_average := weekly_ratio_average
 	current_weekly_standard_deviation := weekly_ratio_standard_deviation
 
-	for x := 0; x <= 100000; x++ {
+	for x := 0; x <= 3000; x++ {
 		simulation := normalDist(current_weekly_average, current_weekly_standard_deviation) * current_simulation_value
 		simulation_values = append(simulation_values, simulation)
 	}

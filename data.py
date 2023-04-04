@@ -4,24 +4,21 @@ import streamlit as st
 import os
 import time
 import json
-import misc
+from misc import Misc
 import datetime
 
-
-
-#API_KEY=st.secrets['API_KEY']
-#finnhub_client = finnhub.Client(api_key=API_KEY)
 
 ticks = int(time.time())
 
 def getOCHLData(ticker, days: int) ->list:
+    miscellaneous = Misc(ticks, days, "", "")
     """Gets Data"""
     now = datetime.datetime.now()
     d = datetime.timedelta(days = days)
     start = now - d
     start = start.strftime('%Y-%m-%d')
 
-    rate_limit_free = misc.telemetry(ticker, days)
+    rate_limit_free = miscellaneous.telemetry()
     if rate_limit_free:
         #data = finnhub_client.stock_candles(ticker, 'D', ticks - start, ticks)
         stock = yf.Ticker(ticker)
@@ -39,9 +36,9 @@ def getOCHLData(ticker, days: int) ->list:
 
 @st.cache_data
 def getRealTimeOCHL(ticker, days:int) ->list:
+    miscellaneous = Misc(ticker, days, "", "")
     """Gets Real Time Data"""
-    #data = finnhub_client.quote(ticker)
-    rate_limit_free = misc.telemetry(ticker, days)
+    rate_limit_free = miscellaneous.telemetry()
     if rate_limit_free:
         stock = yf.Ticker(ticker)
         data = stock.fast_info

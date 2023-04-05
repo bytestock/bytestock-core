@@ -1,9 +1,8 @@
 #Libraries
-
 import statistics
 import random
 from statistics import NormalDist
-import multiprocessing
+
 
 #Functions
 def daily_ratio_calculation(index: int, close_data: list)->float:

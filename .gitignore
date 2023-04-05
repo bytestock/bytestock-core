@@ -5,3 +5,5 @@ __init__.py
 go.sum
 telemetry.txt
 close-data.txt
+.vscode/
+

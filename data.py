@@ -1,18 +1,19 @@
 """Libraries"""
-import yfinance as yf
-import streamlit as st
-import time
-from misc import Misc
-import datetime
+import yfinance as yf # importing the yfinance module to get the stock data
+import streamlit as st # importing the streamlit module to create the web app
+import time # importing the time module to get the current time
+from misc import Misc # importing the Misc class from the misc module
+import datetime # importing the datetime module to get the current date and time
 
 class Data:
-    def __init__(self,stocks, days) -> None:
+    """Data Class"""
+    def __init__(self,stocks, days) -> None: # initializing the class
         self.ticks = int(time.time())
         self.miscellaneous = Misc(self.ticks, "", "", "")
         self.ticker = stocks
         self.days = days
 
-    def getOCHLData(self) ->list:
+    def getOCHLData(self) ->list: #Historical Data for stock and crypto prices
         """Gets Data"""
         now = datetime.datetime.now()
         d = datetime.timedelta(days = self.days)
@@ -24,7 +25,6 @@ class Data:
             stock = yf.Ticker(self.ticker)
             data = yf.download(self.ticker, start=start, end=now.strftime('%Y-%m-%d'))
             
-        #open_days, closed_days = misc.wasMarketClosedFrom(ticks - start, ticks, days-1)
         open_days = data.index.tolist()
         daily_close = list(data['Close'])
         daily_adj_close = list(data['Adj Close'])
@@ -34,11 +34,11 @@ class Data:
 
         return open_days, daily_open, daily_close, daily_adj_close, daily_high, daily_low
  
-    @st.cache_data
-    def getRealTimeOCHL(self) ->list:
+    @st.cache_data # caching the data
+    def getRealTimeOCHL(self) ->list: #Real Time Data for live stock and crypto prices
         """Gets Real Time Data"""
         rate_limit_free = self.miscellaneous.telemetry()
-        if rate_limit_free:
+        if rate_limit_free: 
             stock = yf.Ticker(self.ticker)
             data = stock.fast_info
     

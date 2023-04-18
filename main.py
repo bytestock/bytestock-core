@@ -18,13 +18,14 @@ def main(stock, days)->None: # creating the main() functions
     """
 
     open_days, daily_open, daily_close, daily_adj_close, daily_high, daily_low = data.getOCHLData(days, stock) #Not close data, rather, open; we need Adj Close
+
     with open("close-data.txt", "w") as f:
         for val in daily_adj_close:
             f.write(str(val)+"\n")
         f.close()
 
     #calculations.mathematics(daily_adj_close)
-    args = ("./bytestock-core-public/calc")
+    args = ("./bytestock-core/calc")
     popen = subprocess.Popen(args, stdout=subprocess.PIPE)
     popen.wait()
     output = popen.stdout.readlines()

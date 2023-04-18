@@ -21,13 +21,23 @@ def getOCHLData(days, ticker) ->list:
         stock = yf.Ticker(ticker)
         data = yf.download(ticker, start=start, end=now.strftime('%Y-%m-%d'))
 
-    #open_days, closed_days = misc.wasMarketClosedFrom(ticks - start, ticks, days-1)
-    open_days = data.index.tolist()
-    daily_close = list(data['Close'])
-    daily_adj_close = list(data['Adj Close'])
-    daily_open = list(data['Open'])
-    daily_high = list(data['High'])
-    daily_low = list(data['Low'])
+        return open_days, daily_open, daily_close, daily_adj_close, daily_high, daily_low
+ 
+    @st.cache_data # caching the data
+    def getRealTimeOCHL(_self) ->list: #Real Time Data for live stock and crypto prices
+        """Gets Real Time Data"""
+        rate_limit_free = self.miscellaneous.telemetry()
+        if rate_limit_free: 
+            stock = yf.Ticker(self.ticker)
+            data = stock.fast_info
+    
+        rt_previous_close = list(stock.history(period=f'2d')['Close'])[-2]
+        rt_open = data.open
+        rt_current = data.last_price
+        rt_high = data.day_high
+        rt_low = data.day_low
+        rt_change = rt_current - data.previous_close
+        rt_change_percent = round((rt_current - rt_previous_close)/((rt_current + rt_previous_close) / 2) * 100, 2)
 
     return open_days, daily_open, daily_close, daily_adj_close, daily_high, daily_low
 
